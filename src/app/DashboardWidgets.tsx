@@ -10,7 +10,7 @@ import {
 import { FiArrowRight } from 'react-icons/fi';
 
 import { textStyles } from '@theme/index';
-import { Widget } from '@shared-components/index';
+import { Widget } from '@shared/components/index';
 
 export const ValueBox = ({
   title,

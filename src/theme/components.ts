@@ -156,5 +156,4 @@ export const components: ChakraTheme['components'] = {
     }),
   },
 
-
 }

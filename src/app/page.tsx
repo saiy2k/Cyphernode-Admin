@@ -10,10 +10,10 @@ import {
   SimpleGrid
 } from '@chakra-ui/react'
 
-import { PrimaryButton, Widget } from '@shared-components/index';
+import { PrimaryButton, Widget } from '@shared/components/index';
 import { ValueBox, WalletBox } from './DashboardWidgets';
 
-import { baseURL } from './constants';
+import { baseURL } from '@shared/constants';
 
 interface BlockInfo {
         chain: string;
