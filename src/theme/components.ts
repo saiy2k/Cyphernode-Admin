@@ -59,6 +59,22 @@ export const components: ChakraTheme['components'] = {
           bg: 'blackAlpha.700',
         },
       }),
+      light: (props: StyleFunctionProps) => ({
+        whiteSpace: 'normal',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor:mode('gray.400', 'gray.200')(props),
+        color:mode('gray.600', 'gray.200')(props),
+        bg:mode('white', 'black')(props),
+        _hover: {
+          borderWidth: '1px solid',
+          borderColor:mode('gray.800', 'gray.200')(props),
+          color:mode('gray.800', 'black')(props),
+        },
+        _focus: {
+          bg: 'gray.200'
+        }
+      }),
       solid: (props: StyleFunctionProps) => ({
         color:mode('white', 'black')(props),
         bg: mode('black', 'white')(props),

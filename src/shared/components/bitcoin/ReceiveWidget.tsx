@@ -1,13 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
   Flex,
-  Icon,
   IconButton,
-  Image,
-  Link,
-  SimpleGrid,
   Text,
   useToast,
 } from '@chakra-ui/react';
@@ -15,16 +11,22 @@ import { useClipboard } from '@chakra-ui/react'
 import { MdContentCopy } from 'react-icons/md';
 import QRCode from "react-qr-code";
 
-import { Widget, LoaderOverlay, ErrorOverlay } from '@shared/components/index';
+import { 
+  ButtonGroup,
+  Widget, 
+  LoaderOverlay, 
+  ErrorOverlay,
+} from '@shared/components/index';
 import { getCall } from '@shared/services/api';
+import { ADDRESS_TYPES } from '@shared/constants';
 
 export const BitcoinReceiveWidget = () => {
 
-  const [aType, setAType] = useState('');
+  const [aType, setAType] = useState(ADDRESS_TYPES[0].id);
   const [address, setAddress] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const { onCopy, setValue } = useClipboard("");
+  const {onCopy, setValue} = useClipboard("");
 
   const toast = useToast();
 
@@ -50,6 +52,10 @@ export const BitcoinReceiveWidget = () => {
     }
   }
 
+  useEffect(() => {
+    generateAddress(aType);
+  }, [aType]);
+
   const onClipboardCopy = () => {
     onCopy();
     toast({
@@ -62,14 +68,8 @@ export const BitcoinReceiveWidget = () => {
 
   return (
     <Widget variant='border' style={{ position: 'relative' }}>
-      <Flex>
-        { /*
-        <Image 
-          boxSize='256px'
-          borderRadius='12px'
-          width='256px'
-          src="/qrcode.png" />
-        */ }
+      <Flex flexDirection={{base: 'column-reverse', md: 'row'}} alignItems={{base: 'center', md: 'flex-start'}} gap={{base: '50px', md: '0'}}>
+        
         <QRCode
           style={{ height: "auto", width: '256px', }}
           value={address}
@@ -77,16 +77,19 @@ export const BitcoinReceiveWidget = () => {
         />
 
         <Box ml={4}>
-          <Flex gap={4}>
-            <Button variant='outline' onClick={() => generateAddress('legacy')}> legacy </Button>
-            <Button variant='outline' onClick={() => generateAddress('bech32')}> bech32 </Button>
-            <Button variant='outline' onClick={() => generateAddress('p2sh-segwit')}> p2sh-segwit </Button>
-            <Button variant='outline' onClick={() => generateAddress('taproot')}> taproot </Button>
-          </Flex>
+
+          <ButtonGroup
+            name='address-type'
+            defaultValue={ADDRESS_TYPES[0].id}
+            value={aType}
+            onChange={(value: string) => {setAType(value)}}
+            options={ADDRESS_TYPES}
+            key='address-type'
+          />
 
           <Box mt={4}>
             { address.length > 0 ?
-            <Text fontSize='xl'>
+            <Text fontSize='lg'>
               { address }
               <IconButton 
                 aria-label='Copy address' 
@@ -104,7 +107,8 @@ export const BitcoinReceiveWidget = () => {
 
       {loading ? <LoaderOverlay> Fetching... </LoaderOverlay>: null }
 
-    {error ? <ErrorOverlay onReset={ () => setError(null)}> { error } </ErrorOverlay>: null }
+      {error ? <ErrorOverlay onReset={ () => setError(null)}> { error } </ErrorOverlay>: null }
+
     </Widget>
   )
 }

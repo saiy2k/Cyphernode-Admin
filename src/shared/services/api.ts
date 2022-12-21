@@ -1,3 +1,5 @@
+import axios, {isCancel, AxiosError} from 'axios';
+import https from 'https';
 import { baseURL } from '../constants';
 
 const authKeys: string[] = [
@@ -7,14 +9,25 @@ const authKeys: string[] = [
   ''
 ];
 
+/*
+export const getCall = (urlFragment: string, keyIndex: number): Promise<any> => {
+  return axios.get(urlFragment, {
+    baseURL: baseURL,
+    headers: {
+      Authorization: `Bearer ${authKeys[keyIndex]}`,
+    },
+    httpsAgent: new https.Agent({ rejectUnauthorized: false })
+  });
+}
+*/
+
 export const getCall = (urlFragment: string, keyIndex: number): Promise<any> => {
   return fetch(`${baseURL}/${urlFragment}`, {
     headers: {
-      Authorization: `Bearer ${authKeys[keyIndex]}`
-    }
+      Authorization: `Bearer ${authKeys[keyIndex]}`,
+    },
   });
 }
-
 export const postCall = (urlFragment: string, keyIndex: number, payload: any): Promise<any> => {
   return fetch(`${baseURL}/${urlFragment}`, {
     method: 'POST',

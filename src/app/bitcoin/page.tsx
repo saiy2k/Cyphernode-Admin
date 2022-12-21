@@ -7,39 +7,31 @@ import {
   Box,
   Button,
   Link,
-  SimpleGrid
+  SimpleGrid,
+  Flex,
+  Spacer
 } from '@chakra-ui/react'
 
 import { 
   BitcoinReceiveWidget,
   BitcoinSendWidget,
+  BitcoinTxnTable,
+  ButtonGroup,
   Widget
 } from '@shared/components/index';
 
 import { ValueBox, WalletBox } from '../DashboardWidgets';
 
 import { baseURL } from '@shared/constants';
+import { getCall } from '@shared/services/api';
+import { BlockInfo, Txn } from '@shared/types';
 
-interface BlockInfo {
-        chain: string;
-        blocks: number;
-        headers: number;
-        bestblockhash: string;
-        difficulty: number;
-        time: number;
-        mediantime: number;
-        verificationprogress: number;
-        initialblockdownload: boolean;
-        chainwork: string;
-        size_on_disk: number;
-        pruned: boolean;
-        warnings: string;
-}
 
 export default function Bitcoin() {
 
   const [blockInfo, setBlockInfo] = useState<BlockInfo | null>(null);
   const [balance, setBalance] = useState<number>(0);
+  const [txData, setTxData] = useState<Txn[]>([]);
   const [showSend, setShowSend] = useState<boolean>(false);
   const [showReceive, setShowReceive] = useState<boolean>(false);
 
@@ -48,17 +40,8 @@ export default function Bitcoin() {
 
     (async() => {
       console.log('Home :: useEffect :: call API');
-      const blockInfoP = await fetch(`${baseURL}/getblockchaininfo`, {
-        headers: {
-          Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAwMSIsImV4cCI6MTcwMjQ0ODczM30.M-qlE7C00qaQuTqsUXViKZP-u6ypW2uLEJHOapvHPgg'
-        }
-      });
-
-      const balanceP = await fetch(`${baseURL}/getbalance`, {
-        headers: {
-          Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAwMiIsImV4cCI6MTcwMjQ0ODcxNH0.0MG3P1KF5WLao-MRG2h8Ca3gzZFxmD-rk5KjxRudN8Y'
-        }
-      });
+      const blockInfoP = await getCall('getblockchaininfo', 1);
+      const balanceP = await getCall('getbalance', 2);
 
       const serverResp = await Promise.all([blockInfoP, balanceP]);
       const resp = await Promise.all([serverResp[0].json(), serverResp[1].json()]);
@@ -66,29 +49,43 @@ export default function Bitcoin() {
       setBlockInfo(resp[0]);
       setBalance(resp[1].balance);
 
-      console.log(resp);
+    })();
 
+  }, []);
+
+  useEffect(() => {
+
+    (async() => {
+      const getBalanceP = await getCall('get_txns_spending', 2);
+      const resp = await getBalanceP.json();
+      setTxData(resp.txns);
+      console.log(resp);
     })();
 
   }, []);
 
   return (
     <Widget>
-      <SimpleGrid columns={{ base: 1, sm: 1, md: 2, lg: 4, xxl: 6 }} spacing='16px' mb={5}>
+      <Flex justifyContent='space-between' flexDirection={{base: 'column', sm: 'row'}} gap={{base: 10}} >
 
         <ValueBox title='Onchain balance'>
           { balance === 0 ? 'Loading...' : <> {balance} <chakra.span fontSize={{base: '0.5em'}}> BTC </chakra.span> </> }
         </ValueBox>
 
-        <Box></Box>
+        <Flex gap={30}>
+          <Button width={{base: 100, sm: 200}} h={12} onClick={() => setShowSend(!showSend) }> Send </Button>
+          <Button width={{base: 100, sm: 200}} h={12} onClick={() => setShowReceive(!showReceive) }> Receive </Button>
+        </Flex>
 
-        <Button h={12} onClick={() => setShowSend(!showSend) }> Send </Button>
-        <Button h={12} onClick={() => setShowReceive(!showReceive) }> Receive </Button>
+      </Flex>
 
-      </SimpleGrid>
+      <Box display='flex' flexDirection='column' gap='30px' marginTop={'30px'} marginX='auto' maxWidth={{base: '100%', xl: '80%', xxl: '45%'}}>
+        {showSend ? <BitcoinSendWidget /> : null }
+        {showReceive ? <BitcoinReceiveWidget /> : null }
+      </Box>
 
-      {showSend ? <BitcoinSendWidget /> : null }
-      {showReceive ? <BitcoinReceiveWidget /> : null }
+      <h2 style={{marginTop: 30, marginBottom: 15}}> Transactions </h2>
+      <BitcoinTxnTable data={txData} />
 
     </Widget>
   )

@@ -3,8 +3,9 @@ import { createMultiStyleConfigHelpers } from '@chakra-ui/styled-system';
 import { mode, StyleFunctionProps } from '@chakra-ui/theme-tools'; import { Inter } from '@next/font/google';
 
 import { colors } from './colors';
-import { components } from './components'
-import { styles } from './styles'
+import { components } from './components';
+import { styles } from './styles';
+import { textStyles } from './customStyles';
 
 const Widget = defineStyleConfig({
   baseStyle: {
@@ -19,6 +20,23 @@ const Widget = defineStyleConfig({
     }
   }
 });
+
+const Cell = defineStyleConfig({
+  baseStyle: {
+    py: 2,
+    ...textStyles.body
+
+  },
+  variants: {
+    border: {
+      border:'1px',
+      borderStyle:'solid',
+      borderRadius:'20',
+      borderColor:'gray.400'
+    }
+  }
+});
+
 
 // This function creates a set of function that helps us create multipart component styles.
 const popoverHelpers = createMultiStyleConfigHelpers(['Popover', 'PopoverContent'])
@@ -54,14 +72,17 @@ const theme: DeepPartial<ChakraTheme> = {
   components: {
     ...components,
     Widget,
+    Cell,
     // Popover
   },
   breakpoints: { // From bootstrap 5.x
+    base: '320px',
     sm: '576px',
     md: '768px',
     lg: '992px',
     xl: '1200px',
     xxl: '1600px',
+    xxxl: '2560px',
   }
 }
 

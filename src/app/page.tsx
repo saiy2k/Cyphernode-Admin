@@ -14,6 +14,7 @@ import { PrimaryButton, Widget } from '@shared/components/index';
 import { ValueBox, WalletBox } from './DashboardWidgets';
 
 import { baseURL } from '@shared/constants';
+import { getCall } from '@shared/services/api';
 
 interface BlockInfo {
         chain: string;
@@ -41,29 +42,18 @@ export default function Home() {
 
     (async() => {
       console.log('Home :: useEffect :: call API');
-      const blockInfoP = await fetch(`${baseURL}/getblockchaininfo`, {
-        headers: {
-          Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAwMSIsImV4cCI6MTcwMjQ0ODczM30.M-qlE7C00qaQuTqsUXViKZP-u6ypW2uLEJHOapvHPgg'
-        }
-      });
-
-      const balanceP = await fetch(`${baseURL}/getbalance`, {
-        headers: {
-          Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAwMiIsImV4cCI6MTcwMjQ0ODcxNH0.0MG3P1KF5WLao-MRG2h8Ca3gzZFxmD-rk5KjxRudN8Y'
-        }
-      });
+      const blockInfoP = await getCall('getblockchaininfo', 1);
+      const balanceP = await getCall('getbalance', 2);
 
       const serverResp = await Promise.all([blockInfoP, balanceP]);
+
+      console.log(serverResp);
       const resp = await Promise.all([serverResp[0].json(), serverResp[1].json()]);
+
+      console.log(resp);
 
       setBlockInfo(resp[0]);
       setBalance(resp[1].balance);
-
-      console.log(resp);
-      /*
-      const _blockInfo = await blockInfoResp.json();
-      setBlockInfo(_blockInfo);
-       */
 
     })();
 

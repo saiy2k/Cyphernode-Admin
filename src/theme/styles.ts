@@ -30,6 +30,20 @@ export const styles: ChakraTheme['styles'] = {
       fontSize: { base: '12px', xl: '14px', xxl: '16px' },
       fontWeight: 400,
       lineHeight: { base: '10px', xl: '14px', xxl: '18px'},
+    },
+
+    table: {
+      w: '100%'
+    },
+
+    th: {
+      textAlign: 'left',
+      fontWeight: 'none'
+    },
+
+    tr: {
+      borderBottom: '1.5px solid',
+      borderColor: '#cccccc'
     }
 
   })

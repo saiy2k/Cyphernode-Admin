@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -10,7 +10,11 @@ import {
   Text,
   chakra,
   useColorModeValue,
-  useStyleConfig 
+  useStyleConfig, 
+  useRadioGroup,
+  HStack,
+  useRadio,
+  UseRadioProps
 } from '@chakra-ui/react';
 import { FiArrowRight } from 'react-icons/fi';
 import { MdContentCopy } from 'react-icons/md';
@@ -18,6 +22,86 @@ import { MdContentCopy } from 'react-icons/md';
 import { textStyles } from '@theme/index';
 
 import { getCall } from 'shared/services/api';
+
+
+type ButtonGroupProps = {
+  name: string,
+  defaultValue: string,
+  value: string,
+  onChange: (nextValue: string) => void,
+  options: {id: string, text: string}[],
+  justifyContent?: any
+};
+
+interface ButtonGroupBtnProps extends UseRadioProps {
+  children: React.ReactNode
+};
+
+export const ButtonGroupBtn = (props: ButtonGroupBtnProps) => {
+
+  const { getInputProps, getCheckboxProps } = useRadio(props);
+
+  const input = getInputProps();
+  const checkbox = getCheckboxProps();
+
+  return (
+    <Box as='label' margin='0px !important'>
+      <input {...input} />
+      <Box
+        {...checkbox}
+        cursor='pointer'
+        borderWidth='1px'
+        borderRadius='50px'
+        borderColor='black'
+        _checked={{
+          bg: 'black',
+          color: 'white',
+          borderColor: 'black',
+        }}
+        _focus={{
+          boxShadow: 'outline',
+        }}
+        px={'10px'}
+        py={'3px'}
+      >
+        {props.children}
+      </Box>
+    </Box>
+  );
+}
+
+export const ButtonGroup = (props: ButtonGroupProps) => {
+
+  const { name, defaultValue, value, onChange, options, justifyContent } = props;
+
+  const { getRootProps, getRadioProps } = useRadioGroup({
+    name,
+    defaultValue,
+    onChange,
+  });
+
+  const group = getRootProps();
+
+  return (
+    <HStack {...group} flexWrap={{base: 'wrap'}} gap={{base: '10px', md: '10px'}} justifyContent={justifyContent}>
+      {options.map((value) => {
+        const radio = getRadioProps({ value: value.id })
+        return (
+          <ButtonGroupBtn key={value.id} {...radio}>
+            {value.text}
+          </ButtonGroupBtn>
+        )
+      })}
+    </HStack>
+  )
+
+}
+
+export interface ButtonGroupOptions {
+  id: string;
+  text: string;
+}
+
 
 export const ActionButton = ({href, title, text}: {href: string, title: string, text: string}) => {
   return (
@@ -50,29 +134,18 @@ export const PrimaryButton = ({
   );
 }
 
-export const BitcoinSendWidget = () => {
-  return (
-    <>
-      <chakra.h3 mt={5}>
-        Action Items
-      </chakra.h3>
-      <Link href='#' color={useColorModeValue('#4EA0DB', '#4EA0DB')}>
-        Verify identity
-        <Icon ml={1} as={FiArrowRight} />
-      </Link>
-      <Link href='#' color={useColorModeValue('#4EA0DB', '#4EA0DB')}>
-        Join the mission program
-        <Icon ml={1} mt={1} as={FiArrowRight} />
-      </Link>
-    </>
-  )
-}
-
 // TODO: Type for 'props'
 export const Widget = (props: any) => {
   const { variant, ...rest} = props;
   const styles = useStyleConfig('Widget', {variant});
   return <Box __css={ styles } {...rest} />;
+}
+
+// TODO: Type for 'props'
+export const Cell = (props: any) => {
+  const { variant, ...rest} = props;
+  const styles = useStyleConfig('Cell', {variant});
+  return <chakra.td __css={ styles } {...rest} />;
 }
 
 export const LoaderOverlay = ({children}: {children: React.ReactNode}) => {
@@ -111,6 +184,7 @@ export const ErrorOverlay = ({children, onReset}: {children: React.ReactNode, on
           color: 'red',
           lineHeight: '1em',
           whiteSpace: 'break-spaces',
+          zIndex: 10,
 
       }} >
         <b> Error: </b> <br/> <br/>
@@ -123,3 +197,5 @@ export const ErrorOverlay = ({children, onReset}: {children: React.ReactNode, on
 
 export { BuySellWidget } from './BuySellWidget';
 export { BitcoinReceiveWidget } from './bitcoin/ReceiveWidget';
+export { BitcoinSendWidget } from './bitcoin/SendWidget';
+export { BitcoinTxnTable } from './bitcoin/TxnTable';
