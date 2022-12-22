@@ -30,6 +30,8 @@ type Inputs = {
 
 export const BitcoinSendWidget = () => {
 
+  console.log('Render: Bitcoin Send Widget');
+
   const btcToggle = useRef<HTMLButtonElement>(null);
   const formVars = useForm<Inputs>();
   const { register, handleSubmit, formState: { errors }, trigger, getValues, setValue, reset } = formVars;

@@ -43,6 +43,7 @@ export const components: ChakraTheme['components'] = {
       rounded: 'full',
       color:mode('red', 'blue')(props),
       bg: mode('black', 'white')(props),
+      fontSize: { base: '16px', xl: '20px', xxl: '26px' },
     }),
     variants: {
       primary: (props: StyleFunctionProps) => ({

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   chakra,
   Box,
@@ -9,8 +9,9 @@ import {
   Input,
   Select,
   useToast,
+  useBreakpointValue,
+  useBreakpoint,
 } from '@chakra-ui/react';
-import { useClipboard } from '@chakra-ui/react'
 
 import { MdExpandMore, MdExpandLess } from 'react-icons/md';
 
@@ -30,26 +31,31 @@ import { TxnDetail } from './TxnTableDetail';
 
 export const BitcoinTxnTable = ({data}: {data: Txn[]}) => {
 
+  const breakpoint = useBreakpoint({ssr: false});
   const [selectedRowIndex, setSelectedRowIndex] = useState(-1);
 
   const columns = useMemo<ColumnDef<Txn>[]>(() => [{
+    id: 'type',
     accessorKey: 'category',
     header: () => <chakra.span> Type </chakra.span>,
     cell: info => info.getValue(),
   }, {
-    accessorKey: 'time',
     id: 'time',
+    accessorKey: 'time',
     header: () => <span> Time </span>,
     cell: info => new Date((info.getValue() as any) * 1000).toLocaleString(),
   }, {
+    id: 'amount',
     accessorKey: 'amount',
     header: () => <span> btc </span>,
     cell: info => (info.getValue() as any).toFixed(8),
   }, {
+    id: 'txid',
     accessorKey: 'txid',
     header: () => <span> Tx id </span>,
     cell: info => (info.getValue() as any).slice(0, 12) + '...',
   }, {
+    id: 'confirmations',
     accessorKey: 'confirmations',
     header: () => <span> Status </span>,
     cell: info => info.getValue() === 0 ? 'pending': `confirmed (${info.getValue()})`,
@@ -58,7 +64,6 @@ export const BitcoinTxnTable = ({data}: {data: Txn[]}) => {
     cell: props => props.row.index === selectedRowIndex ? <Icon as={MdExpandMore} w={6} h={6} />: <Icon as={MdExpandLess} w={6} h={6} />
 
   }], [selectedRowIndex]);
-
 
   const toast = useToast();
 
@@ -71,6 +76,26 @@ export const BitcoinTxnTable = ({data}: {data: Txn[]}) => {
     })
   }
 
+  useEffect(() => {
+    console.log('breakposit: ', breakpoint);
+    const columnsToToggle = ['txid', 'confirmations'];
+
+    if(['base', 'sm', 'md'].includes(breakpoint)) {
+      table.getAllColumns().map(column => {
+        if(columnsToToggle.includes(column.id)) {
+          column.toggleVisibility(false);
+        }
+      });
+    } else {
+      table.getAllColumns().map(column => {
+        if(columnsToToggle.includes(column.id)) {
+          column.toggleVisibility(true);
+        }
+      });
+    }
+  }, [breakpoint]);
+
+
   const table = useReactTable({
     data,
     columns,
@@ -81,7 +106,7 @@ export const BitcoinTxnTable = ({data}: {data: Txn[]}) => {
 
 
   return (
-    <Widget variant='border' style={{ position: 'relative' }}>
+    <Widget variant='border' style={{ position: 'relative', overflowX: 'auto' }}>
       <table>
 
         <thead>

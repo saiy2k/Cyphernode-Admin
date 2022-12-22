@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   Box,
-  Button,
   Flex,
   IconButton,
   Text,
@@ -17,16 +16,19 @@ import {
   LoaderOverlay, 
   ErrorOverlay,
 } from '@shared/components/index';
+
 import { getCall } from '@shared/services/api';
 import { ADDRESS_TYPES } from '@shared/constants';
 
 export const BitcoinReceiveWidget = () => {
 
+  console.log('Render: Bitcoin Receive Widget');
+
   const [aType, setAType] = useState(ADDRESS_TYPES[0].id);
   const [address, setAddress] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const {onCopy, setValue} = useClipboard("");
+  const {onCopy, setValue: setClipboardValue } = useClipboard("");
 
   const toast = useToast();
 
@@ -40,7 +42,7 @@ export const BitcoinReceiveWidget = () => {
       }
       const response = await serverResp.json();
       setAddress(response.address);
-      setValue(response.address);
+      setClipboardValue(response.address);
     } catch (err: unknown) {
       if (typeof err === 'string') {
         setError(err);
@@ -76,7 +78,7 @@ export const BitcoinReceiveWidget = () => {
           viewBox={`0 0 256 256`}
         />
 
-        <Box ml={4}>
+        <Box ml={{ base: 0, md: 4 }}>
 
           <ButtonGroup
             name='address-type'

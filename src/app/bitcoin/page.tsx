@@ -1,33 +1,25 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 
-import { 
-  chakra,
-  Box,
-  Button,
-  Link,
-  SimpleGrid,
-  Flex,
-  Spacer
-} from '@chakra-ui/react'
+import { chakra, Box, Button, Flex } from '@chakra-ui/react';
 
 import { 
   BitcoinReceiveWidget,
   BitcoinSendWidget,
   BitcoinTxnTable,
-  ButtonGroup,
   Widget
 } from '@shared/components/index';
 
-import { ValueBox, WalletBox } from '../DashboardWidgets';
+import { ValueBox } from '../DashboardWidgets';
 
-import { baseURL } from '@shared/constants';
 import { getCall } from '@shared/services/api';
 import { BlockInfo, Txn } from '@shared/types';
 
-
 export default function Bitcoin() {
+
+  console.log('Render: Bitcoin page');
 
   const [blockInfo, setBlockInfo] = useState<BlockInfo | null>(null);
   const [balance, setBalance] = useState<number>(0);
@@ -36,10 +28,9 @@ export default function Bitcoin() {
   const [showReceive, setShowReceive] = useState<boolean>(false);
 
   useEffect(() => {
-    console.log('Home :: useEffect');
 
     (async() => {
-      console.log('Home :: useEffect :: call API');
+      console.log('Home :: useEffect :: call API :: info');
       const blockInfoP = await getCall('getblockchaininfo', 1);
       const balanceP = await getCall('getbalance', 2);
 
@@ -49,6 +40,12 @@ export default function Bitcoin() {
       setBlockInfo(resp[0]);
       setBalance(resp[1].balance);
 
+      // TODO: Batching is not working
+      // ReactDOM.unstable_batchedUpdates(() => {
+      //   setBlockInfo(resp[0]);
+      //   setBalance(resp[1].balance);
+      // });
+
     })();
 
   }, []);
@@ -56,6 +53,7 @@ export default function Bitcoin() {
   useEffect(() => {
 
     (async() => {
+      console.log('Home :: useEffect :: call API :: txns');
       const getBalanceP = await getCall('get_txns_spending', 2);
       const resp = await getBalanceP.json();
       setTxData(resp.txns);

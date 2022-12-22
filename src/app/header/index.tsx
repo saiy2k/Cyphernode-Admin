@@ -36,10 +36,10 @@ import { NAV_ITEMS, USER_NAV_ITEMS } from './header.data';
  */
 export default function WithSubnavigation() {
 
-  const { isOpen, onToggle } = useDisclosure();
-  const { isOpen: isUserOpen, onToggle: onUserToggle } = useDisclosure();
+  const { isOpen, onToggle } = useDisclosure({ id: 'main' });
+  const { isOpen: isUserOpen, onToggle: onUserToggle } = useDisclosure({ id: 'user' });
 
-  console.log('WithSubnavigation :: isOpen ::', isOpen);
+  console.log('WithSubnavigation :: isOpen ::', isOpen, isUserOpen);
 
   return (
     <Box>
@@ -71,11 +71,11 @@ export default function WithSubnavigation() {
           direction={'row'}
           spacing={6}>
 
-          <Flex display={{ base: 'flex', md: 'none' }} alignItems='center' justify={'flex-end'}>
-            <MobileNav />
+          <Flex display={{ base: 'flex', lg: 'none' }} alignItems='center' justify={'flex-end'}>
+            <MobileNav isOpen={isOpen} onToggle={onToggle} isUserOpen={isUserOpen} onUserToggle={onUserToggle} />
           </Flex>
 
-          <Flex display={{ base: 'none', md: 'flex' }} ml={10}>
+          <Flex display={{ base: 'none', lg: 'flex' }} ml={10}>
             <DesktopNav />
           </Flex>
 
@@ -96,7 +96,6 @@ export default function WithSubnavigation() {
 const DesktopNav = () => {
 
   const { colorMode, toggleColorMode } = useColorMode()
-  console.log('DesktopNav :: colorMode', colorMode);
 
   return (
     <Stack direction={'row'} spacing={4} alignItems='center'>
@@ -124,17 +123,21 @@ const DesktopNav = () => {
 };
 
 
-const MobileNav = () => {
+type MobileNavProps = {
+  isOpen: boolean,
+  onToggle: any,
+  isUserOpen: boolean,
+  onUserToggle: any
+}
+const MobileNav = ({ isOpen, onToggle, isUserOpen, onUserToggle }: MobileNavProps) => {
 
   const { colorMode, toggleColorMode } = useColorMode()
-
-  const { isOpen, onToggle } = useDisclosure();
-  const { isOpen: isUserOpen, onToggle: onUserToggle } = useDisclosure();
 
   return (
     <>
       <IconButton
         onClick={() => {
+          console.log('Toggle 1');
           onToggle();
           if (isUserOpen) {
             onUserToggle();
@@ -186,7 +189,7 @@ const MobileNavItems = () => {
     <Stack
       bg={useColorModeValue('white', 'gray.800')}
       p={4}
-      display={{ md: 'none' }}>
+      display={{ lg: 'none' }}>
 
       {NAV_ITEMS.map((navItem) => (
         <MobileNavItem key={navItem.id} {...navItem} />
@@ -200,7 +203,7 @@ const MobileUserItems = () => {
     <Stack
       bg={useColorModeValue('white', 'gray.800')}
       p={4}
-      display={{ md: 'none' }}>
+      display={{ lg: 'none' }}>
 
       {USER_NAV_ITEMS.map((navItem) => (
         <MobileNavItem key={navItem.id} {...navItem} />

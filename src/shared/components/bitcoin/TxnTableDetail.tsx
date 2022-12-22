@@ -1,4 +1,5 @@
 import React from 'react';
+import dayjs from 'dayjs';
 import {
   Box,
   Flex,
@@ -28,7 +29,7 @@ export const TxnDetail = ({row}: {row: any}) => {
 
 
   return (
-    <Box my={2}>
+    <Box my={2} width={{base: '100%', md: '100%'}}>
       <Flex direction='row' w='100%' justifyContent='space-between' mb={2}>
         <span> Amount </span>
         <b> { row.original.amount } </b>
@@ -47,6 +48,38 @@ export const TxnDetail = ({row}: {row: any}) => {
         <span> Confirmed block </span>
         <b> { row.original.confirmations } </b>
       </Flex>
+
+      <Box mb={2}>
+        <b> First seen time </b>
+        <Text>
+          { dayjs(row.original.time * 1000).format("DD-MMM-YYYY hh:mm:ss A") }
+        </Text>
+      </Box>
+
+      <Box mb={2}>
+        <b> Date </b>
+        <Text>
+          { dayjs(row.original.timereceived * 1000).format("DD-MMM-YYYY hh:mm:ss A") }
+        </Text>
+      </Box>
+
+      <Box mb={2}>
+        <b> Transaction ID </b>
+        <Text>
+          { row.original.txid }
+          <IconButton 
+            aria-label='Copy address' 
+            icon={<MdContentCopy />}  
+            variant='outline'
+            ml={2} w={6} h={6} 
+            onClick={() => {
+              onCopyTxid();
+              showToast();
+            }}
+          />
+        </Text>
+      </Box>
+
 
       <Box mb={2}>
         <b> Address </b>
