@@ -78,7 +78,7 @@ export const BitcoinReceiveWidget = () => {
           viewBox={`0 0 256 256`}
         />
 
-        <Box ml={{ base: 0, md: 4 }}>
+        <Box ml={{ base: 0, md: 4 }} width='100%'>
 
           <ButtonGroup
             name='address-type'
@@ -91,7 +91,7 @@ export const BitcoinReceiveWidget = () => {
 
           <Box mt={4}>
             { address.length > 0 ?
-            <Text fontSize='lg'>
+            <Text fontSize='lg' lineHeight={{base: '1.5rem'}}>
               { address }
               <IconButton 
                 aria-label='Copy address' 

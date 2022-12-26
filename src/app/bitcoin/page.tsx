@@ -37,8 +37,10 @@ export default function Bitcoin() {
       const serverResp = await Promise.all([blockInfoP, balanceP]);
       const resp = await Promise.all([serverResp[0].json(), serverResp[1].json()]);
 
-      setBlockInfo(resp[0]);
-      setBalance(resp[1].balance);
+      ReactDOM.unstable_batchedUpdates(() => {
+        setBlockInfo(resp[0]);
+        setBalance(resp[1].balance);
+      });
 
       // TODO: Batching is not working
       // ReactDOM.unstable_batchedUpdates(() => {
@@ -54,7 +56,7 @@ export default function Bitcoin() {
 
     (async() => {
       console.log('Home :: useEffect :: call API :: txns');
-      const getBalanceP = await getCall('get_txns_spending', 2);
+      const getBalanceP = await getCall('get_txns_spending/1000', 2);
       const resp = await getBalanceP.json();
       setTxData(resp.txns);
       console.log(resp);
@@ -71,8 +73,8 @@ export default function Bitcoin() {
         </ValueBox>
 
         <Flex gap={30}>
-          <Button width={{base: 100, sm: 200}} h={12} onClick={() => setShowSend(!showSend) }> Send </Button>
-          <Button width={{base: 100, sm: 200}} h={12} onClick={() => setShowReceive(!showReceive) }> Receive </Button>
+          <Button width={{base: '50%', sm: 200}} h={12} onClick={() => setShowSend(!showSend) }> Send </Button>
+          <Button width={{base: '50%', sm: 200}} h={12} onClick={() => setShowReceive(!showReceive) }> Receive </Button>
         </Flex>
 
       </Flex>

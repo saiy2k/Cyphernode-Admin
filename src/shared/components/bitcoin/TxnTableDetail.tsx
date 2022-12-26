@@ -11,6 +11,8 @@ import {
 import { useClipboard } from '@chakra-ui/react'
 import { MdContentCopy } from 'react-icons/md';
 import { MdLink } from 'react-icons/md';
+import { DetailRow } from '@shared/types';
+import {textStyles} from '@theme/customStyles';
 
 export const TxnDetail = ({row}: {row: any}) => {
 
@@ -27,110 +29,122 @@ export const TxnDetail = ({row}: {row: any}) => {
     })
   }
 
-
-  return (
-    <Box my={2} width={{base: '100%', md: '100%'}}>
-      <Flex direction='row' w='100%' justifyContent='space-between' mb={2}>
-        <span> Amount </span>
-        <b> { row.original.amount } </b>
-
-        <span> &nbsp; </span>
-        <span> &nbsp; </span>
-        <span> &nbsp; </span>
-
-        <span> Confirmations </span>
-        <b> { row.original.confirmations } </b>
-
-        <span> &nbsp; </span>
-        <span> &nbsp; </span>
-        <span> &nbsp; </span>
-
-        <span> Confirmed block </span>
-        <b> { row.original.confirmations } </b>
-      </Flex>
-
-      <Box mb={2}>
-        <b> First seen time </b>
-        <Text>
-          { dayjs(row.original.time * 1000).format("DD-MMM-YYYY hh:mm:ss A") }
-        </Text>
-      </Box>
-
-      <Box mb={2}>
-        <b> Date </b>
-        <Text>
-          { dayjs(row.original.timereceived * 1000).format("DD-MMM-YYYY hh:mm:ss A") }
-        </Text>
-      </Box>
-
-      <Box mb={2}>
-        <b> Transaction ID </b>
-        <Text>
-          { row.original.txid }
-          <IconButton 
-            aria-label='Copy address' 
-            icon={<MdContentCopy />}  
-            variant='outline'
-            ml={2} w={6} h={6} 
-            onClick={() => {
-              onCopyTxid();
-              showToast();
-            }}
-          />
-        </Text>
-      </Box>
-
-
-      <Box mb={2}>
-        <b> Address </b>
-        <Text>
-          { row.original.address }
-          <IconButton 
-            aria-label='Copy address' 
-            icon={<MdContentCopy />}  
-            variant='outline'
-            ml={2} w={6} h={6} 
-            onClick={() => {
-              onCopyAddress();
-              showToast();
-            }}
-          />
-          <Link href={`https://mempool.space/address/${row.original.address}`}>
+  const detailRows: DetailRow[] = [
+    {
+      key: 1,
+      left: {
+        title: 'Amount',
+        value: <Text {...textStyles.body}>{row.original.amount}</Text>
+      },
+      right: {
+        title: 'Confirmations',
+        value: <Text {...textStyles.body}>{row.original.confirmations}</Text>
+      }
+    },
+    {
+      key: 2,
+      left: {
+        title: 'Confirmed block',
+        value: <Text {...textStyles.body}>{row.original.confirmations}</Text>
+      },
+      right: {
+        title: '',
+        value: ''
+      }
+    },
+    {
+      key: 3,
+      left: {
+        title: 'First seen time',
+        value: <Text {...textStyles.body}>{dayjs(row.original.time * 1000).format("DD-MMM-YYYY hh:mm:ss A")}</Text>
+      },
+      right: {
+        title: 'Date',
+        value: <Text {...textStyles.body}>{dayjs(row.original.timereceived * 1000).format("DD-MMM-YYYY hh:mm:ss A")}</Text>
+      }
+    },
+    {
+      key: 4,
+      left: {
+        title: 'Transaction ID',
+        value: (
+          <Flex alignItems='center'>
+            <Text whiteSpace={{base: 'nowrap', md: 'normal'}} overflow={{base: 'hidden', md: 'unset'}} width={{base: '150px', md: 'auto'}} textOverflow='ellipsis' {...textStyles.body} maxW='400px'>
+              { row.original.txid }
+            </Text>
             <IconButton 
-              aria-label='Open address in mempool.space' 
-              icon={<MdLink />}  
+              aria-label='Copy address' 
+              icon={<MdContentCopy />}  
               variant='outline'
               ml={2} w={6} h={6} 
               onClick={() => {
-                onCopyAddress();
+                onCopyTxid();
                 showToast();
               }}
             />
-          </Link>
-        </Text>
-      </Box>
-
-      <Box>
-        <b> Tx id </b>
-        <Text>
-          { row.original.txid }
-          <IconButton 
-            aria-label='Copy Tx id' 
-            icon={<MdContentCopy />}  
-            variant='outline'
-            ml={2} w={6} h={6} 
-          />
-          <Link href={`https://mempool.space/tx/${row.original.txid}`}>
+          </Flex>
+        )
+      },
+      right: {
+        title: 'Address',
+        value: (
+          <Flex alignItems='center'>
+            <Text whiteSpace={{base: 'nowrap', md: 'normal'}} overflow={{base: 'hidden', md: 'unset'}} width={{base: '150px', md: 'auto'}} textOverflow='ellipsis' {...textStyles.body} maxW='400px'>
+              { row.original.address }
+            </Text>
             <IconButton 
-              aria-label='Open tx in mempool.space' 
-              icon={<MdLink />}  
-              variant='outline'
-              ml={2} w={6} h={6} 
+                aria-label='Copy address' 
+                icon={<MdContentCopy />}  
+                variant='outline'
+                ml={2} w={6} h={6} 
+                onClick={() => {
+                  onCopyAddress();
+                  showToast();
+                }}
             />
-          </Link>
-        </Text>
-      </Box>
+            <Link target='_blank' href={`https://mempool.space/address/${row.original.address}`}>
+              <IconButton 
+                aria-label='Open address in mempool.space' 
+                icon={<MdLink />}  
+                variant='outline'
+                ml={2} w={6} h={6} 
+                onClick={() => {
+                  onCopyAddress();
+                  showToast();
+                }}
+              />
+            </Link>
+          </Flex>
+        )
+      }
+    },
+  ];
 
+
+  return (
+    <Box my={2} width={{base: '100%', md: '100%'}}>
+      <Flex flexDirection='column' gap='20px'>
+        {
+          detailRows.map((row: DetailRow) => <DetailRow key={row.key} row={row} />)
+        }
+      </Flex>
     </Box>
+  );
+}
+
+function DetailRow(props: {row: DetailRow}) {
+  const row: DetailRow = props.row;
+
+  return (
+    <Flex flexDirection={{base: 'column', lg: 'row'}}>
+      <Box mb={2} flex={1}>
+        <b> {row.left.title} </b>
+        {row.left.value}
+      </Box>
+      <Box mb={2} flex={1}>
+        <b> {row.right.title} </b>
+        {row.right.value}
+      </Box>
+    </Flex>
   );
 }

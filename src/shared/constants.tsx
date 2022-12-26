@@ -1,6 +1,6 @@
 import { AddressType, AmountType, FeeType } from "./types";
 
-export const baseURL: string = 'https://192.168.1.2:2009/v0';
+export const baseURL: string = 'https://192.168.1.5:2009/v0';
 
 export const FEE_TYPES: FeeType[] = [
     {

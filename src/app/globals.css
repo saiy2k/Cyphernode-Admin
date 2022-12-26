@@ -24,3 +24,7 @@ a {
     background: black;
   }
 }
+
+.chakra-popover__content {
+  width: auto !important;
+}

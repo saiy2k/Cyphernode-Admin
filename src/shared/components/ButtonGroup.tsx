@@ -16,7 +16,7 @@ export type ButtonGroupBtnProps = UseRadioProps & BoxProps & {
 
 export const ButtonGroupBtn = (props: ButtonGroupBtnProps) => {
 
-  const { children, ...rest } = props;
+  const { children, isChecked ,...rest } = props;
 
   const { getInputProps, getCheckboxProps } = useRadio(props);
 

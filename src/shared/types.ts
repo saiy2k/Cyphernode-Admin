@@ -1,3 +1,5 @@
+import { ColumnDef } from "@tanstack/react-table";
+import { ReactNode } from "react";
 import { ButtonGroupOptions } from "./components";
 
 export type Txn = {
@@ -43,3 +45,16 @@ export interface FeeType extends ButtonGroupOptions { };
 export interface AmountType extends ButtonGroupOptions { };
 
 export interface AddressType  extends ButtonGroupOptions { };
+
+export type CustomColumnDef<T> = ColumnDef<T> & { fieldType?: string }
+
+export type DetailCell = {
+  title: string,
+  value: ReactNode
+}
+
+export type DetailRow = {
+  key: number;
+  left: DetailCell;
+  right: DetailCell;
+};

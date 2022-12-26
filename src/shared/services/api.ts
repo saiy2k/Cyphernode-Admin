@@ -4,8 +4,8 @@ import { baseURL } from '../constants';
 
 const authKeys: string[] = [
   '',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAwMSIsImV4cCI6MTcwMjQ0ODczM30.M-qlE7C00qaQuTqsUXViKZP-u6ypW2uLEJHOapvHPgg',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAwMiIsImV4cCI6MTcwMjQ0ODcxNH0.0MG3P1KF5WLao-MRG2h8Ca3gzZFxmD-rk5KjxRudN8Y',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAwMSIsImV4cCI6MTcwMzYwOTQ1M30.EvzflCGcNTxJkU6XkdJNaINFJBjzB4Zv78KG98pfF6w',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAwMiIsImV4cCI6MTcwMzYwOTQ1N30.zkrjWm_VfbGcK0ftIu8lD0mQSrhiZQnxxaJphnr4GEM',
   ''
 ];
 
