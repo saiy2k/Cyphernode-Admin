@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { useState } from 'react';
 
-import { chakra, Box, Button, Flex } from '@chakra-ui/react';
+import { Box, Button, Flex } from '@chakra-ui/react';
 
 import { 
   BitcoinReceiveWidget,
@@ -12,65 +11,19 @@ import {
   Widget
 } from '@shared/components/index';
 
-import { ValueBox } from '../DashboardWidgets';
-
-import { getCall } from '@shared/services/api';
-import { BlockInfo, Txn } from '@shared/types';
+import OnChainBalance from '@shared/components/bitcoin/OnChainBalance';
 
 export default function Bitcoin() {
 
   console.log('Render: Bitcoin page');
-
-  const [blockInfo, setBlockInfo] = useState<BlockInfo | null>(null);
-  const [balance, setBalance] = useState<number>(0);
-  const [txData, setTxData] = useState<Txn[]>([]);
   const [showSend, setShowSend] = useState<boolean>(false);
   const [showReceive, setShowReceive] = useState<boolean>(false);
-
-  useEffect(() => {
-
-    (async() => {
-      console.log('Home :: useEffect :: call API :: info');
-      const blockInfoP = await getCall('getblockchaininfo', 1);
-      const balanceP = await getCall('getbalance', 2);
-
-      const serverResp = await Promise.all([blockInfoP, balanceP]);
-      const resp = await Promise.all([serverResp[0].json(), serverResp[1].json()]);
-
-      ReactDOM.unstable_batchedUpdates(() => {
-        setBlockInfo(resp[0]);
-        setBalance(resp[1].balance);
-      });
-
-      // TODO: Batching is not working
-      // ReactDOM.unstable_batchedUpdates(() => {
-      //   setBlockInfo(resp[0]);
-      //   setBalance(resp[1].balance);
-      // });
-
-    })();
-
-  }, []);
-
-  useEffect(() => {
-
-    (async() => {
-      console.log('Home :: useEffect :: call API :: txns');
-      const getBalanceP = await getCall('get_txns_spending/1000', 2);
-      const resp = await getBalanceP.json();
-      setTxData(resp.txns);
-      console.log(resp);
-    })();
-
-  }, []);
 
   return (
     <Widget>
       <Flex justifyContent='space-between' flexDirection={{base: 'column', sm: 'row'}} gap={{base: 10}} >
 
-        <ValueBox title='Onchain balance'>
-          { balance === 0 ? 'Loading...' : <> {balance} <chakra.span fontSize={{base: '0.5em'}}> BTC </chakra.span> </> }
-        </ValueBox>
+        <OnChainBalance />
 
         <Flex gap={30}>
           <Button width={{base: '50%', sm: 200}} h={12} onClick={() => setShowSend(!showSend) }> Send </Button>
@@ -85,9 +38,9 @@ export default function Bitcoin() {
       </Box>
 
       <h2 style={{marginTop: 30, marginBottom: 15}}> Transactions </h2>
-      <BitcoinTxnTable data={txData} />
+      
+      <BitcoinTxnTable />
 
     </Widget>
   )
 }
-

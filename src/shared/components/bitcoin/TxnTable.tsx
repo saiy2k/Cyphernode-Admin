@@ -1,25 +1,20 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { PropsWithChildren, useEffect, useMemo, useRef, useState } from 'react';
+
 import {
   chakra,
-  Box,
   Button,
   Flex,
   Icon,
-  IconButton,
   Input,
   Select,
-  useToast,
-  useBreakpointValue,
   useBreakpoint,
   InputProps,
 } from '@chakra-ui/react';
 
 import { MdExpandMore, MdExpandLess } from 'react-icons/md';
 import { IoChevronDownCircleOutline, IoChevronDownCircle, IoChevronUpCircle } from 'react-icons/io5';
-
 import {
   Column,
-  ColumnDef,
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
@@ -30,26 +25,116 @@ import {
   getSortedRowModel,
   Table,
   useReactTable,
+  PaginationState,
+  ColumnFilter,
+  SortingState,
 } from '@tanstack/react-table';
 import { RangeDatepicker } from 'chakra-dayzed-datepicker';
+import { useErrorHandler, withErrorBoundary } from 'react-error-boundary';
 
-import { Widget, Cell, LoaderOverlay, ErrorOverlay } from '@shared/components/index';
-import { CustomColumnDef, Txn } from '@shared/types';
+import { Widget, Cell } from '@shared/components/index';
+import { CustomColumnDef, Txn, SuccessResponse } from '@shared/types';
 import { TxnDetail } from './TxnTableDetail';
+import { dummyTxnDataForSkeleton } from '@shared/constants';
+import { getCallProxy } from '@shared/services/api';
+import { ErrorBoundaryFallback } from '../ErrorBoundaryFallback';
 
-export const BitcoinTxnTable = ({data}: {data: Txn[]}) => {
+import { LoadingTable } from './TxnLoadingTable';
+
+// TODO: Move this file, TxnLoadingTable into /shared/components/txn-table/*
+export const BitcoinTxnTable = () => {
+
+  console.log('BitcoinTxnTable :: Load');
+
+  const [ txData, setTxData ] = useState<Txn[]>([]);
+  const [ pageCount, setPageCount ] = useState(0);
+
+  const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
+  const [ filters, setFilters ] = useState({
+    type: '',
+    start: '',
+    end: '',
+    amountMin: 0,
+    amountMax: 0,
+    status: ''
+  });
+
+  const [ sort, setSort ] = useState({
+    sortColumn: '',
+    sortDirection: ''
+  });
+
+  useEffect(() => {
+
+    setTxnDataLoading(true);
+
+    (async() => {
+      console.log('Home :: useEffect :: call API :: txns');
+      try {
+        const response = await getCallProxy('txns', { perPage: pageSize, page: pageIndex, ...filters, ...sort });
+        const txns: SuccessResponse = await response.json();
+        console.log(txns);
+        setTxData(txns.data);
+        setPageCount(txns.meta.pageCount);
+      } catch(err) {
+        console.log(err);
+      } finally {
+        setTxnDataLoading(false);
+      }
+    })();
+  }, [pageIndex, pageSize, filters, sort]);
+
+
+  const onPaginationChange = (pagination: {pageSize: number, pageIndex: number}) => {
+    console.log('onPaginationChange');
+    setPagination({
+      pageIndex: pagination.pageIndex,
+      pageSize: pagination.pageSize
+    });
+  }
+
+  const onFilterChange = (filters: {type: string, start: string, end: string, amountMin: number, amountMax: number, status: string}) => {
+    console.log('onFilterChange');
+    // setFilters(filters);
+  }
+
+  const onSortChange = (sortObj: {column: string, direction: string}) => {
+    console.log('onSortChange');
+    setSort({
+      sortColumn: sortObj.column,
+      sortDirection: sortObj.direction
+    });
+  }
+
+  const [txnDataLoading, setTxnDataLoading] = useState<boolean>(true);
+  const handleError = useErrorHandler();
 
   const breakpoint = useBreakpoint({ssr: false});
   const [selectedRowIndex, setSelectedRowIndex] = useState(-1);
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  const pagination = React.useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+    }),
+    [pageIndex, pageSize]
+  );
+
+  const [sorting, setSorting] = React.useState<SortingState>([])
+
   const columns = useMemo<CustomColumnDef<Txn>[]>(() => [{
     id: 'type',
     accessorKey: 'category',
     header: () => <chakra.span> Type </chakra.span>,
     cell: info => info.getValue(),
-    fieldType: 'select'
+    fieldType: 'select',
+    options: ["generate", "immature", "receive", "send"]
   }, {
     id: 'time',
     accessorKey: 'time',
@@ -61,6 +146,7 @@ export const BitcoinTxnTable = ({data}: {data: Txn[]}) => {
     accessorKey: 'amount',
     header: () => <span> btc </span>,
     cell: info => (info.getValue() as any).toFixed(8),
+    fieldType: 'number'
   }, {
     id: 'txid',
     accessorKey: 'txid',
@@ -72,26 +158,15 @@ export const BitcoinTxnTable = ({data}: {data: Txn[]}) => {
     accessorFn: (row) => (Boolean(row.confirmations) && row.confirmations > 0) ?'Confirmed': 'Pending',
     header: () => <span> Status </span>,
     cell: (info) => info.cell.row.original.confirmations ===0 ? 'Pending': `Confirmation(${info.cell.row.original.confirmations})`,
-    fieldType: 'select'
+    fieldType: 'select',
+    options: ["pending", "confirmed"]
   }, {
     id: 'actions',
     cell: props => props.row.index === selectedRowIndex ? <Icon as={MdExpandMore} w={6} h={6} />: <Icon as={MdExpandLess} w={6} h={6} />
 
   }], [selectedRowIndex]);
 
-  const toast = useToast();
-
-  const onClipboardCopy = () => {
-    toast({
-      title: 'Copied...',
-      status: 'success',
-      duration: 3000,
-      isClosable: true,
-    })
-  }
-
   useEffect(() => {
-    console.log('breakposit: ', breakpoint);
     const columnsToToggle = ['txid', 'confirmations'];
 
     if(['base', 'sm', 'md'].includes(breakpoint)) {
@@ -110,11 +185,75 @@ export const BitcoinTxnTable = ({data}: {data: Txn[]}) => {
   }, [breakpoint]);
 
 
+  const didMount = useRef(false);
+
+  useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      return;
+    }
+
+    onPaginationChange({pageIndex, pageSize});
+  }, [pageIndex, pageSize]);
+
+  useEffect(() => {
+    const filterObj = columnFilters.reduce((prev: any, cur: ColumnFilter & {value: any}) => {
+      switch(cur.id) {
+        case 'type':
+          prev['type'] = cur.value.toLowerCase();
+          break;
+        case 'time':
+          if(cur.value[0] !== undefined) {
+            prev['start'] = new Date(cur.value[0] * 1000).toISOString();
+          }
+
+          if(cur.value[1] !== undefined) {
+            prev['end'] = new Date(cur.value[1] * 1000).toISOString();
+          }
+          break;
+        case 'amount':
+          if(cur.value[0]) {
+            prev['amountMin'] = Number(cur.value[0]);
+          }
+
+          if(cur.value[1]) {
+            prev['amountMax'] = Number(cur.value[1]);
+          }
+          break;
+        case 'confirmations':
+          prev['status'] = cur.value.toLowerCase();
+          break;
+      }
+
+      return prev;
+    }, {} as any);
+
+    onFilterChange(filterObj);
+  }, [columnFilters]);
+
+
+  useEffect(() => {
+    const sortObj = {
+      column: '',
+      direction: ''
+    };
+
+    if(sorting.length === 1) {
+      sortObj.column = sorting[0].id;
+      sortObj.direction = sorting[0].desc ? 'DESC' : 'ASC';
+    }
+
+    onSortChange(sortObj);
+  }, [sorting]);
+
+
   const table = useReactTable({
-    data,
+    data: Array.isArray(txData) && txData.length === 0 ? dummyTxnDataForSkeleton: txData,
     columns,
     state: {
       columnFilters,
+      pagination,
+      sorting,
     },
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
@@ -123,10 +262,27 @@ export const BitcoinTxnTable = ({data}: {data: Txn[]}) => {
     getSortedRowModel: getSortedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    onPaginationChange: setPagination,
+    manualPagination: true,
+    pageCount,
     debugTable: true,
     debugHeaders: true,
     debugColumns: false,
+    onSortingChange: setSorting,
   });
+
+  const hydrated = useRef(false);
+
+  useEffect(() => {
+    if(!hydrated.current) {
+      hydrated.current = true;
+    }
+  }, []);
+
+  // Returns loading on first render, so the client and server match
+  if (!hydrated.current || txnDataLoading) {
+    return <LoadingTable table={table} />;
+  }
 
   return (
     <Widget variant='border' style={{ position: 'relative', overflowX: 'auto' }}>
@@ -214,7 +370,11 @@ export const BitcoinTxnTable = ({data}: {data: Txn[]}) => {
   )
 }
 
-const Paginator = ({table}: {table: Table<any>}) => {
+type PaginatorProps = PropsWithChildren & {
+  table: Table<Txn>
+};
+
+const Paginator = ({table}: PaginatorProps) => {
   return (
     <>
       <Flex flexDirection={{base: 'column-reverse', md: 'row'}} my={2} w='100%' justifyContent='end' alignItems={{base: 'flex-start',md: 'center'}} gap={5} marginTop={'25px'}>
@@ -249,7 +409,7 @@ const Paginator = ({table}: {table: Table<any>}) => {
             table.setPageSize(Number(e.target.value))
           }}
         >
-          {[2, 3, 5, 10, 20, 30, 40, 50].map(pageSize => (
+          {[10, 25, 50, 100].map(pageSize => (
             <option key={pageSize} value={pageSize}>
               Show {pageSize}
             </option>
@@ -295,14 +455,15 @@ const Paginator = ({table}: {table: Table<any>}) => {
   );
 }
 
+type FilterProps = PropsWithChildren & {
+  column: Column<any, unknown>,
+  table: Table<Txn>
+};
 
 function Filter({
   column,
   table,
-}: {
-  column: Column<any, unknown>
-  table: Table<any>
-}) {
+}: FilterProps) {
   const firstValue = table
     .getPreFilteredRowModel()
     .flatRows[0]?.getValue(column.id)
@@ -321,7 +482,9 @@ function Filter({
 
   const [selectedDates, setSelectedDates] = useState<Date[]>([new Date(), new Date()]);
 
-  return (column.columnDef as CustomColumnDef<Txn>).fieldType === "select"
+  const columnDef = (column.columnDef as CustomColumnDef<Txn>);
+
+  return columnDef.fieldType === "select"
   ? (
     <div>
       <Select
@@ -332,12 +495,12 @@ function Filter({
         width={{base: '175px', md: '175px'}}
       >
         {
-          sortedUniqueValues.map(value => <option key={value}>{value}</option>)
+          columnDef.options?.map(value => <option style={{textTransform: 'capitalize'}} key={value}>{value}</option>)
         }
       </Select>
     </div>
   )
-  : typeof firstValue === 'number' && !(["confirmations", "time"].includes(column.id)) ? (
+  : columnDef.fieldType === 'number' ? (
     <div>
       <Flex gap={'10px'} className="flex space-x-2" justifyContent='center' marginLeft='20px'>
         <DebouncedInput
@@ -422,17 +585,19 @@ function Filter({
 }
 
 // A debounced input react component
+type DebouncedInputProps = PropsWithChildren & Omit<InputProps, 'onChange' | 'width'> & {
+  value: string | number
+  onChange: (value: string | number) => void,
+  width?: any,
+  debounce?: number
+};
+
 function DebouncedInput({
   value: initialValue,
   onChange,
   debounce = 500,
   ...props
-}: {
-  value: string | number
-  onChange: (value: string | number) => void,
-  width?: any,
-  debounce?: number
-} & Omit<InputProps, 'onChange' | 'width'>) {
+}: DebouncedInputProps ) {
   const [value, setValue] = React.useState(initialValue)
 
   React.useEffect(() => {
@@ -451,3 +616,10 @@ function DebouncedInput({
     <Input {...props} value={value} onChange={e => setValue(e.target.value)} />
   )
 }
+
+
+const BitcoinTxnTableWithErrorBoundary = withErrorBoundary(BitcoinTxnTable, {
+  fallbackRender: (fallbackProps) => (<ErrorBoundaryFallback {...fallbackProps} title='Transaction table' />)
+});
+
+export default BitcoinTxnTableWithErrorBoundary;

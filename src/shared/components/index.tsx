@@ -1,8 +1,5 @@
-import React from 'react';
-import {
-  ThemingProps,
-} from "@chakra-ui/styled-system";
-import { Dict } from "@chakra-ui/utils";
+import React, { MouseEventHandler, PropsWithChildren } from 'react';
+
 import {
   Box,
   BoxProps,
@@ -17,11 +14,18 @@ import {
   useStyleConfig, 
   HTMLChakraProps
 } from '@chakra-ui/react';
+
 import { FiArrowRight } from 'react-icons/fi';
 
 import { textStyles } from '@theme/index';
 
-export const ActionButton = ({href, title, text}: {href: string, title: string, text: string}) => {
+type ActionButtonProps = PropsWithChildren & {
+  href: string,
+  title: string,
+  text: string,
+};
+
+export const ActionButton = ({href, title, text}: ActionButtonProps) => {
   return (
     <Flex mb={4}>
       <Image 
@@ -39,13 +43,14 @@ export const ActionButton = ({href, title, text}: {href: string, title: string, 
   );
 }
 
+type PrimaryButtonProps = PropsWithChildren & {
+  onClick: MouseEventHandler<HTMLButtonElement>,
+};
+
 export const PrimaryButton = ({
   children,
   onClick
-}: {
-  children: React.ReactNode,
-  onClick: any
-}) => {
+}: PrimaryButtonProps) => {
 
   return (
     <Button onClick={onClick}> { children } </Button>
@@ -73,7 +78,9 @@ export const Cell = (props: CellProps) => {
   return <chakra.td __css={ styles } {...rest} />;
 }
 
-export const LoaderOverlay = ({children}: {children: React.ReactNode}) => {
+type LoaderOverlayProps = PropsWithChildren;
+
+export const LoaderOverlay = ({children}: LoaderOverlayProps) => {
   return (
     <Text
       fontSize='2rem'
@@ -93,7 +100,11 @@ export const LoaderOverlay = ({children}: {children: React.ReactNode}) => {
   );
 }
 
-export const ErrorOverlay = ({children, onReset}: {children: React.ReactNode, onReset: any}) => {
+type ErrorOverlayProps = PropsWithChildren & {
+  onReset: MouseEventHandler<HTMLButtonElement>,
+};
+
+export const ErrorOverlay = ({children, onReset}: ErrorOverlayProps) => {
   return (
     <Text
       fontSize='1.2rem'
@@ -115,15 +126,17 @@ export const ErrorOverlay = ({children, onReset}: {children: React.ReactNode, on
         <b> Error: </b> <br/> <br/>
         { children }
         <br/> <br/>
-        <Button onClick={() => { onReset() }}> Retry </Button>
+        <Button onClick={onReset}> Retry </Button>
       </Text>
   );
 }
 
 export { BuySellWidget } from './BuySellWidget';
-export { BitcoinReceiveWidget } from './bitcoin/ReceiveWidget';
-export { BitcoinSendWidget } from './bitcoin/SendWidget';
-export { BitcoinTxnTable } from './bitcoin/TxnTable';
+import BitcoinReceiveWidget from './bitcoin/ReceiveWidget';
+import BitcoinSendWidget from './bitcoin/SendWidget';
+import BitcoinTxnTable from './bitcoin/TxnTable';
+
+export { BitcoinTxnTable, BitcoinSendWidget, BitcoinReceiveWidget };
 
 export {
   type ButtonGroupProps,

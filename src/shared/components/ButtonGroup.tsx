@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
+
 import {
   Box, BoxProps,
   HStack, StackProps,
-  useRadio, useRadioGroup, UseRadioProps
+  useRadio, useRadioGroup, UseRadioGroupProps, UseRadioProps
 } from '@chakra-ui/react';
 
 export interface ButtonGroupOptions {
@@ -10,9 +11,7 @@ export interface ButtonGroupOptions {
   text: string;
 }
 
-export type ButtonGroupBtnProps = UseRadioProps & BoxProps & {
-  children: React.ReactNode
-};
+export type ButtonGroupBtnProps = PropsWithChildren & UseRadioProps & BoxProps;
 
 export const ButtonGroupBtn = (props: ButtonGroupBtnProps) => {
 
@@ -49,11 +48,8 @@ export const ButtonGroupBtn = (props: ButtonGroupBtnProps) => {
   );
 }
 
-export type ButtonGroupProps = Omit<StackProps, 'onChange'> & {
-  name: string,
-  defaultValue: string,
+export type ButtonGroupProps = UseRadioGroupProps & Omit<StackProps, 'onChange'> & {
   value: string,
-  onChange: (nextValue: string) => void,
   options: ButtonGroupOptions[],
   justifyContent?: any
 };

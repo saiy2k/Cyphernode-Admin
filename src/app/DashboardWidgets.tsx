@@ -1,8 +1,9 @@
+import { PropsWithChildren } from 'react';
+
 import {
   chakra,
   Box,
   Icon,
-  Image,
   Link,
   useColorModeValue
 } from '@chakra-ui/react';
@@ -12,13 +13,15 @@ import { FiArrowRight } from 'react-icons/fi';
 import { textStyles } from '@theme/index';
 import { Widget } from '@shared/components/index';
 
+type ValueBoxProps = PropsWithChildren & {
+  title: string,
+  children: React.ReactNode,
+};
+
 export const ValueBox = ({
   title,
   children
-}: {
-  title: string,
-  children: React.ReactNode
-}) => {
+}: ValueBoxProps) => {
 
   return (
     <Widget py={4} variant='border'>
@@ -32,19 +35,21 @@ export const ValueBox = ({
   );
 }
 
+type WalletBoxProps = PropsWithChildren & {
+  title: string,
+  balance: number
+  unconfirmedUntrusted: number,
+  unconfirmedTrusted: number,
+  confirmed: number,
+};
+
 export const WalletBox = ({
   title,
   balance,
   unconfirmedUntrusted,
   unconfirmedTrusted,
   confirmed,
-}: {
-  title: string,
-  balance: number
-  unconfirmedUntrusted: number,
-  unconfirmedTrusted: number,
-  confirmed: number,
-}) => {
+}: WalletBoxProps) => {
   return (
     <Box>
       <h4>

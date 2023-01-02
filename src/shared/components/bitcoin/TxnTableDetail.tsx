@@ -1,5 +1,5 @@
-import React from 'react';
-import dayjs from 'dayjs';
+import React, { PropsWithChildren } from 'react';
+
 import {
   Box,
   Flex,
@@ -7,14 +7,21 @@ import {
   IconButton,
   Text,
   useToast,
+  useClipboard,
 } from '@chakra-ui/react';
-import { useClipboard } from '@chakra-ui/react'
+
+import dayjs from 'dayjs';
 import { MdContentCopy } from 'react-icons/md';
 import { MdLink } from 'react-icons/md';
-import { DetailRow } from '@shared/types';
-import {textStyles} from '@theme/customStyles';
+import { DetailRow, Txn } from '@shared/types';
+import { textStyles } from '@theme/customStyles';
+import { Row } from '@tanstack/react-table';
 
-export const TxnDetail = ({row}: {row: any}) => {
+type TxnDetailProps = PropsWithChildren & {
+  row: Row<Txn>
+};
+
+export const TxnDetail = ({row}: TxnDetailProps) => {
 
   const { onCopy: onCopyAddress } = useClipboard(row.original.address);
   const { onCopy: onCopyTxid } = useClipboard(row.original.txid);
@@ -132,7 +139,12 @@ export const TxnDetail = ({row}: {row: any}) => {
   );
 }
 
-function DetailRow(props: {row: DetailRow}) {
+
+type DetailRowProps = PropsWithChildren & {
+  row: DetailRow
+};
+
+function DetailRow(props: DetailRowProps) {
   const row: DetailRow = props.row;
 
   return (

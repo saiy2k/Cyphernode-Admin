@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { useForm, SubmitHandler, useWatch } from "react-hook-form";
 
 import {
   chakra,
@@ -11,16 +10,18 @@ import {
   Input,
   InputGroup,
   InputRightElement,
-  SimpleGrid,
-  Text,
   useToast,
 } from '@chakra-ui/react';
 
+import { useForm, SubmitHandler } from "react-hook-form";
 import { validate, getAddressInfo } from 'bitcoin-address-validation';
+import { useErrorHandler, withErrorBoundary } from 'react-error-boundary';
 
-import { Widget, LoaderOverlay, ErrorOverlay, ButtonGroup } from '@shared/components/index';
+import { Widget, LoaderOverlay, ButtonGroup } from '@shared/components/index';
 import { postCall } from '@shared/services/api';
 import { FEE_TYPES, AMOUNT_TYPES } from '@shared/constants';
+import { ErrorBoundaryFallback } from '../ErrorBoundaryFallback';
+import { SpendCoinPayload } from '@shared/types';
 
 type Inputs = {
   amount: string,
@@ -28,7 +29,7 @@ type Inputs = {
   fee: number,
 };
 
-export const BitcoinSendWidget = () => {
+const BitcoinSendWidget = () => {
 
   console.log('Render: Bitcoin Send Widget');
 
@@ -38,9 +39,10 @@ export const BitcoinSendWidget = () => {
   const [ amountInSats, setAmountInSats ] = useState<boolean>(false);
   const [ addressInfo, setAddressInfo ] = useState<any>(null);
   const [ loading, setLoading ] = useState<boolean>(false);
-  const [ error, setError ] = useState<string | null>(null);
   const [ feeType, setFeeType ] = useState<string>(FEE_TYPES[0].id);
   const [ amountType, setAmountType ] = useState<string>(AMOUNT_TYPES[0].id);
+
+  const handleError = useErrorHandler();
 
   const toast = useToast();
 
@@ -87,10 +89,10 @@ export const BitcoinSendWidget = () => {
     }
   }, [amountType]);
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
     console.log('Form is valid');
     console.log(data);
-    const payload: any = {
+    const payload: SpendCoinPayload = {
       address: data.address,
       amount: amountInSats ? parseFloat(data.amount) * 100000000 : parseInt(data.amount)
     };
@@ -98,16 +100,16 @@ export const BitcoinSendWidget = () => {
     spendCoin(payload);
   };
 
-  const spendCoin = async (payload: any) => {
+  const spendCoin = async (payload: SpendCoinPayload) => {
     setLoading(true);
     try {
       const serverResp = await postCall('spend', 2, payload);
       if (!serverResp.ok) {
-        debugger;
+        // debugger;
         let errorString = serverResp.status + ': ' + serverResp.statusText;
         if (serverResp.body) {
           const serverError = await serverResp.json();
-          debugger;
+          // debugger;
           errorString = errorString + ': ' + (serverError.message ? serverError.message : JSON.stringify(serverError));
         }
         throw new Error(errorString);
@@ -126,11 +128,7 @@ export const BitcoinSendWidget = () => {
         })
       }
     } catch (err: unknown) {
-      if (typeof err === 'string') {
-        setError(err);
-      } else if (err instanceof Error) {
-        setError(err.message);
-      }
+      handleError(err);
     } finally {
       setLoading(false);
     }
@@ -228,7 +226,7 @@ export const BitcoinSendWidget = () => {
 
       {loading ? <LoaderOverlay> Spending... </LoaderOverlay>: null }
 
-      {error ? <ErrorOverlay onReset={ () => setError(null)}> { error } </ErrorOverlay>: null }
+      {/* {error ? <ErrorOverlay onReset={ () => setError(null)}> { error } </ErrorOverlay>: null } */}
 
     </Widget>
   )
@@ -289,3 +287,9 @@ const BitcoinAmountField = (props: any) => {
     </FormControl>
   );
 }
+
+const BitcoinSendWidgetWithErrorBoundary = withErrorBoundary(BitcoinSendWidget, {
+  fallbackRender: (fallbackProps) => (<ErrorBoundaryFallback {...fallbackProps} title='Send widget' />)
+});
+
+export default BitcoinSendWidgetWithErrorBoundary;

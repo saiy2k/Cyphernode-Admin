@@ -1,5 +1,7 @@
-import { ColumnDef } from "@tanstack/react-table";
 import { ReactNode } from "react";
+
+import { ColumnDef } from "@tanstack/react-table";
+
 import { ButtonGroupOptions } from "./components";
 
 export type Txn = {
@@ -46,7 +48,7 @@ export interface AmountType extends ButtonGroupOptions { };
 
 export interface AddressType  extends ButtonGroupOptions { };
 
-export type CustomColumnDef<T> = ColumnDef<T> & { fieldType?: string }
+export type CustomColumnDef<T> = ColumnDef<T> & { fieldType?: string, options?: any[] }
 
 export type DetailCell = {
   title: string,
@@ -57,4 +59,10 @@ export type DetailRow = {
   key: number;
   left: DetailCell;
   right: DetailCell;
+};
+
+export { type SuccessResponse, type ErrorResponse } from './api.types';
+export type SpendCoinPayload = {
+  address: string,
+  amount: number,
 };
