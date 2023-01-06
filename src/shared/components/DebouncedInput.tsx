@@ -17,7 +17,7 @@ export type DebouncedInputProps = PropsWithChildren & Omit<InputProps, 'onChange
 export function DebouncedInput({
   value: initialValue,
   onChange,
-  debounce = 500,
+  debounce = 800,
   ...props
 }: DebouncedInputProps ) {
   const [value, setValue] = useState(initialValue)

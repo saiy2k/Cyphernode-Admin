@@ -2,12 +2,6 @@ import httpProxy from 'http-proxy';
 import { generateKey } from '@shared/utils/auth-keys';
 import { baseURL } from 'shared/constants';
 
-// const options = {
-//     target : "https://127.0.0.1:2009",
-//     secure : false,
-//     preserveHeaderKeyCase: true
-// }
-
 export const config = {
   api: {
     // Enable `externalResolver` option in Next.js
