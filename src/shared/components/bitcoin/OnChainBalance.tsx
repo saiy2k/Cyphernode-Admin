@@ -4,7 +4,7 @@ import { Skeleton, chakra } from "@chakra-ui/react";
 
 import { withErrorBoundary, useErrorHandler } from "react-error-boundary";
 
-import { getCall } from "@shared/services/api";
+import { getCallProxy } from "@shared/services/api";
 import { ValueBox } from "app/DashboardWidgets";
 import { ErrorBoundaryFallback } from "../ErrorBoundaryFallback";
 
@@ -20,7 +20,7 @@ function OnChainBalance() {
       setBalanceLoading(true);
 
       try {
-        const balanceP = await getCall("getbalance", 2);
+        const balanceP = await getCallProxy("getbalance");
         if (!balanceP.ok) {
           throw new Error(balanceP.status + ': ' + balanceP.statusText);
         }

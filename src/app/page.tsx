@@ -13,24 +13,9 @@ import {
 import { PrimaryButton, Widget } from '@shared/components/index';
 import { ValueBox, WalletBox } from './DashboardWidgets';
 
-import { baseURL } from '@shared/constants';
-import { getCall } from '@shared/services/api';
+import { BlockInfo } from '@shared/types';
+import { getCallProxy } from '@shared/services/api';
 
-interface BlockInfo {
-        chain: string;
-        blocks: number;
-        headers: number;
-        bestblockhash: string;
-        difficulty: number;
-        time: number;
-        mediantime: number;
-        verificationprogress: number;
-        initialblockdownload: boolean;
-        chainwork: string;
-        size_on_disk: number;
-        pruned: boolean;
-        warnings: string;
-}
 
 export default function Home() {
 
@@ -42,8 +27,8 @@ export default function Home() {
 
     (async() => {
       console.log('Home :: useEffect :: call API');
-      const blockInfoP = await getCall('getblockchaininfo', 1);
-      const balanceP = await getCall('getbalance', 2);
+      const blockInfoP = await getCallProxy('getblockchaininfo');
+      const balanceP = await getCallProxy('getbalance');
 
       const serverResp = await Promise.all([blockInfoP, balanceP]);
 
@@ -91,7 +76,7 @@ export default function Home() {
 
   return (
     <Widget>
-      <SimpleGrid columns={{ base: 1, sm: 1, md: 2, lg: 2, xxl: 6 }} spacing='16px' mb={5}>
+      <SimpleGrid columns={{ base: 1, sm: 1, md: 2, lg: 2, xxl: 3 }} spacing='16px' mb={5}>
         <Box>
           <chakra.h3 mb={4}>
             Cypernode Summary

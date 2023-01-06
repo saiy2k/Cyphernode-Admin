@@ -19,7 +19,7 @@ import {
   ButtonGroup,
   Widget,
 } from '@shared/components/index';
-import { getCall } from '@shared/services/api';
+import { getCallProxy } from '@shared/services/api';
 import { ADDRESS_TYPES } from '@shared/constants';
 import { ErrorBoundaryFallback } from '../ErrorBoundaryFallback';
 
@@ -37,10 +37,11 @@ const BitcoinReceiveWidget = () => {
   const toast = useToast();
 
   const generateAddress = async (addType: string) => {
-    setAType(addType);
+    console.log('Receive Widget :: generateAddress');
+    // setAType(addType);
     setLoading(true);
     try {
-      const serverResp = await getCall(`getnewaddress/${addType}`, 2);
+      const serverResp = await getCallProxy(`getnewaddress/${addType}`);
       if (!serverResp.ok) {
         throw new Error(serverResp.status + ': ' + serverResp.statusText);
       }
@@ -55,6 +56,7 @@ const BitcoinReceiveWidget = () => {
   }
 
   useEffect(() => {
+    console.log('Receive Widget :: useEffect');
     generateAddress(aType);
   }, [aType]);
 
@@ -92,7 +94,7 @@ const BitcoinReceiveWidget = () => {
           />
 
           <Box mt={4}>
-            <SkeletonText isLoaded={!loading}>
+            <SkeletonText isLoaded={!loading} noOfLines={2} skeletonHeight={6} spacing={3} as='div'>
               { address.length > 0 ?
               <Text fontSize='lg' lineHeight={{base: '1.5rem'}}>
                 { address }
@@ -104,7 +106,7 @@ const BitcoinReceiveWidget = () => {
                   onClick={onClipboardCopy}
                 />
                 <br/>
-                <Text fontSize='md' mt={2}>({ aType })</Text>
+                <Text fontSize='md' mt={2} as='span'>({ aType })</Text>
               </Text>: null }
             </SkeletonText>
           </Box>
@@ -114,7 +116,6 @@ const BitcoinReceiveWidget = () => {
     </Widget>
   )
 }
-
 
 const BitcoinReceiveWidgetWithErrorBoundary = withErrorBoundary(BitcoinReceiveWidget, {
   fallbackRender: (fallbackProps) => (<ErrorBoundaryFallback {...fallbackProps} title='Receive widget' />)

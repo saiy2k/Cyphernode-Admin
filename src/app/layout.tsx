@@ -5,10 +5,10 @@ import {
   ChakraProvider,
   ColorModeScript,
   Flex,
-  SimpleGrid
 } from '@chakra-ui/react'
 
-
+// import { Header } from "@sp/web/index";
+// import { NAV_ITEMS, MOBILE_NAV_ITEMS } from "./header/header.data";
 import Header from './header';
 import Footer from './footer';
 import './globals.css'
@@ -34,9 +34,11 @@ export default function RootLayout({
 
       <body className={inter.className} style={{overflow: 'hidden'}}>
         <Flex flexDirection="column" height="100vh" overflowY='hidden'>
-          { /* <ColorModeScript initialColorMode={theme.config.initialColorMode} /> */ }
+          <ColorModeScript initialColorMode={theme.config.initialColorMode} />
           <ChakraProvider theme={theme}>
+
             <Header />
+            { /*<Header desktopNav={NAV_ITEMS} mobileNav={MOBILE_NAV_ITEMS} /> */ }
 
             <Flex w='100%' height='100%' flex='auto'>
 
@@ -53,26 +55,6 @@ export default function RootLayout({
         </Flex>
       </body>
 
-      {/*
-      <body className={inter.className}>
-        <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-        <ChakraProvider theme={theme}>
-          <Header />
-
-          <Flex w='100%' maxW='1600px' m='auto'>
-
-            <Box display={{ base: 'none', lg: 'flex'}} flexDirection='column' p={5} w='320px' bg='gray.100'>
-              Side menu
-            </Box>
-
-            <Flex direction='column' flex='auto'>
-              {children}
-            </Flex>
-          </Flex>
-          <Footer />
-        </ChakraProvider>
-      </body>
-        */ }
     </html>
   )
 }

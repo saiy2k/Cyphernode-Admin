@@ -1,0 +1,3 @@
+[submodule "modules/Web-Common"]
+	path = modules/Web-Common
+	url = git@github.com:SatoshiPortal/Web-Common.git

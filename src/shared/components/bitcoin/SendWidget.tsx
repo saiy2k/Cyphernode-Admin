@@ -18,15 +18,15 @@ import { validate, getAddressInfo } from 'bitcoin-address-validation';
 import { useErrorHandler, withErrorBoundary } from 'react-error-boundary';
 
 import { Widget, LoaderOverlay, ButtonGroup } from '@shared/components/index';
-import { postCall } from '@shared/services/api';
-import { FEE_TYPES, AMOUNT_TYPES } from '@shared/constants';
+import { postCallProxy } from '@shared/services/api';
+import { CONF_TARGET, AMOUNT_TYPES } from '@shared/constants';
 import { ErrorBoundaryFallback } from '../ErrorBoundaryFallback';
 import { SpendCoinPayload } from '@shared/types';
 
 type Inputs = {
   amount: string,
   address: string,
-  fee: number,
+  target: number,
 };
 
 const BitcoinSendWidget = () => {
@@ -35,11 +35,11 @@ const BitcoinSendWidget = () => {
 
   const btcToggle = useRef<HTMLButtonElement>(null);
   const formVars = useForm<Inputs>();
-  const { register, handleSubmit, formState: { errors }, trigger, getValues, setValue, reset } = formVars;
+  const { register, handleSubmit, formState: { errors }, getValues, setValue, reset } = formVars;
   const [ amountInSats, setAmountInSats ] = useState<boolean>(false);
   const [ addressInfo, setAddressInfo ] = useState<any>(null);
   const [ loading, setLoading ] = useState<boolean>(false);
-  const [ feeType, setFeeType ] = useState<string>(FEE_TYPES[0].id);
+  const [ confTarget, setConfTarget ] = useState<string>(CONF_TARGET[2].id);
   const [ amountType, setAmountType ] = useState<string>(AMOUNT_TYPES[0].id);
 
   const handleError = useErrorHandler();
@@ -94,7 +94,8 @@ const BitcoinSendWidget = () => {
     console.log(data);
     const payload: SpendCoinPayload = {
       address: data.address,
-      amount: amountInSats ? parseFloat(data.amount) * 100000000 : parseInt(data.amount)
+      amount: amountInSats ? parseFloat(data.amount) * 100000000 : parseInt(data.amount),
+      confTarget: data.target
     };
 
     spendCoin(payload);
@@ -103,7 +104,7 @@ const BitcoinSendWidget = () => {
   const spendCoin = async (payload: SpendCoinPayload) => {
     setLoading(true);
     try {
-      const serverResp = await postCall('spend', 2, payload);
+      const serverResp = await postCallProxy('spend', payload);
       if (!serverResp.ok) {
         // debugger;
         let errorString = serverResp.status + ': ' + serverResp.statusText;
@@ -194,27 +195,27 @@ const BitcoinSendWidget = () => {
           <FormErrorMessage> Address required </FormErrorMessage>: null }
         </FormControl>
 
-        { /* Fee field */ }
-        <FormControl mb={2} isInvalid={errors.hasOwnProperty('fee')}>
-          <FormLabel>Fee</FormLabel>
+        { /* Target field */ }
+        <FormControl mb={2} isInvalid={errors.hasOwnProperty('target')}>
+          <FormLabel>Confirmation Target (in blocks) </FormLabel>
 
           <InputGroup flexDirection={{base: 'column'}} maxHeight={{base: '300px', md: 'auto'}}>
-            <Input type='text' {...register('fee', { required: true}) } />
+            <Input type='text' {...register('target', { required: true}) } />
 
             <InputRightElement display={{base: 'flex'}} height={{base: 'auto', md: ''}} marginTop={{base: '20px', md: '0px'}} width='auto' gap={{base: '5px', lg: '5px', xl: '10px'}} justifyContent='end' position={{base: 'relative', md: 'absolute'}} top={{md: '50%'}} transform={{md: 'translateY(-50%)'}} paddingRight={{md: '5px'}}>
               <ButtonGroup
-                name='fee-type'
+                name='target-type'
                 defaultValue='auto-fastest'
-                value={feeType}
-                onChange={(value: string) => {setFeeType(value)}}
-                options={FEE_TYPES}
-                key='fee-type'
+                value={confTarget}
+                onChange={(value: string) => { console.log('confTarget: ', value); setConfTarget(value); setValue('target', parseInt(value)); }}
+                options={CONF_TARGET}
+                key='target-type'
                 justifyContent='flex-end'
               />
             </InputRightElement>
           </InputGroup>
 
-          <FormErrorMessage> Invalid fee </FormErrorMessage>
+          <FormErrorMessage> Invalid Target </FormErrorMessage>
         </FormControl>
 
         <Button type='submit' marginTop={{base: '20px', md: '10px'}} alignSelf={{base: 'center', md: 'end'}} w={{base: '50%', md: '20%'}}> Submit </Button>
@@ -230,62 +231,6 @@ const BitcoinSendWidget = () => {
 
     </Widget>
   )
-}
-
-const BitcoinAmountField = (props: any) => {
-
-  const btcToggle = useRef<HTMLButtonElement>(null);
-  const [ amountInSats, setAmountInSats ] = useState<boolean>(false);
-  const { register, formState: { errors }, trigger, getValues, setValue, reset } = props.formVars;
-
-  useEffect(() => {
-    btcToggle.current?.click();
-  }, []);
-
-  const convertToBtc = () => {
-    if (!amountInSats) return;
-    setAmountInSats(false);
-    const fieldValue = getValues('amount');
-    if (fieldValue.length === 0) {
-      setValue('amount', '0');
-      return;
-    }
-    const inBtc = (parseInt(fieldValue) / 100000000).toFixed(8);
-    setValue('amount', inBtc);
-  }
-
-  const convertToSats = () => {
-    if (amountInSats) return;
-    setAmountInSats(true);
-    const fieldValue = getValues('amount');
-    console.log('fieldValue: ', fieldValue, fieldValue.length);
-    if (fieldValue.length === 0) {
-      setValue('amount', '0');
-      return;
-    }
-    const inSat = (parseFloat(fieldValue) * 100000000).toFixed(0);
-    setValue('amount', inSat);
-  }
-
-
-  return (
-    <FormControl mb={2} isInvalid={errors.hasOwnProperty('amount')}>
-      <FormLabel>Amount</FormLabel>
-
-      <InputGroup>
-        <Input type='text' {...register('amount', { required: true, pattern: { value: /^[0-9]*\.?[0-9]*$/, message: 'Should be a number'} }) } />
-        <InputRightElement width='250px' justifyContent='end'>
-          <Button variant='light' px={8} size='sm' mr={1} onClick={() => convertToBtc() } ref={btcToggle}> btc </Button>
-          <Button variant='light' px={8} size='sm' mr={1} onClick={() => convertToSats() }> sats </Button>
-        </InputRightElement>
-      </InputGroup>
-
-      <FormHelperText> [btc shown in fiat value] </FormHelperText>
-
-    { errors.amount?.type === 'required' ? 
-      <FormErrorMessage> Amount is mandatory </FormErrorMessage>: null }
-    </FormControl>
-  );
 }
 
 const BitcoinSendWidgetWithErrorBoundary = withErrorBoundary(BitcoinSendWidget, {

@@ -8,7 +8,6 @@ import {
   Input,
   Select,
   useBreakpoint,
-  InputProps,
 } from '@chakra-ui/react';
 
 import { MdExpandMore, MdExpandLess } from 'react-icons/md';
@@ -18,11 +17,6 @@ import {
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFacetedMinMaxValues,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   Table,
   useReactTable,
   PaginationState,
@@ -38,35 +32,34 @@ import { TxnDetail } from './TxnTableDetail';
 import { dummyTxnDataForSkeleton } from '@shared/constants';
 import { getCallProxy } from '@shared/services/api';
 import { ErrorBoundaryFallback } from '../ErrorBoundaryFallback';
+import { DebouncedInput } from 'shared/components/DebouncedInput';
 
 import { LoadingTable } from './TxnLoadingTable';
 
 // TODO: Move this file, TxnLoadingTable into /shared/components/txn-table/*
 export const BitcoinTxnTable = () => {
 
-  console.log('BitcoinTxnTable :: Load');
+  console.log('Render: BitcoinTxnTable');
 
   const [ txData, setTxData ] = useState<Txn[]>([]);
+  const [ txnDataLoading, setTxnDataLoading ] = useState<boolean>(true);
   const [ pageCount, setPageCount ] = useState(0);
 
-  const [{ pageIndex, pageSize }, setPagination] = React.useState<PaginationState>({
+  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
+  const [sorting, setSorting] = useState<SortingState>([{
+    id: "time",
+    desc: true
+  }])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const [ filters, setFilters ] = useState({
-    type: '',
-    start: '',
-    end: '',
-    amountMin: 0,
-    amountMax: 0,
-    status: ''
-  });
+  const breakpoint = useBreakpoint({ssr: false});
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number>(-1);
+  const [selectedDates, setSelectedDates] = useState<Date[]>([new Date(), new Date()]);
 
-  const [ sort, setSort ] = useState({
-    sortColumn: '',
-    sortDirection: ''
-  });
+  const handleError = useErrorHandler();
 
   useEffect(() => {
 
@@ -75,58 +68,29 @@ export const BitcoinTxnTable = () => {
     (async() => {
       console.log('Home :: useEffect :: call API :: txns');
       try {
-        const response = await getCallProxy('txns', { perPage: pageSize, page: pageIndex, ...filters, ...sort });
+
+        const filters = reduceColumnFilters(columnFilters);
+        const sortColumn = sorting.length === 1 ? sorting[0].id : '';
+        const sortDirection = sorting.length === 1 ? sorting[0].desc ? 'DESC' : 'ASC' : '';
+
+        const response = await getCallProxy('txns', { perPage: pageSize, page: pageIndex, ...filters, sortColumn, sortDirection });
+        if (!response.ok) {
+          const bodyResp = await response.json();
+          throw new Error(response.status + ': ' + response.statusText + ': ' + JSON.stringify(bodyResp));
+        }
         const txns: SuccessResponse = await response.json();
-        console.log(txns);
         setTxData(txns.data);
         setPageCount(txns.meta.pageCount);
-      } catch(err) {
-        console.log(err);
-      } finally {
         setTxnDataLoading(false);
+      } catch(err) {
+        setTxnDataLoading(false);
+        setTxData([]);
+        setPageCount(0);
+        handleError(err);
       }
     })();
-  }, [pageIndex, pageSize, filters, sort]);
 
-
-  const onPaginationChange = (pagination: {pageSize: number, pageIndex: number}) => {
-    console.log('onPaginationChange');
-    setPagination({
-      pageIndex: pagination.pageIndex,
-      pageSize: pagination.pageSize
-    });
-  }
-
-  const onFilterChange = (filters: {type: string, start: string, end: string, amountMin: number, amountMax: number, status: string}) => {
-    console.log('onFilterChange');
-    // setFilters(filters);
-  }
-
-  const onSortChange = (sortObj: {column: string, direction: string}) => {
-    console.log('onSortChange');
-    setSort({
-      sortColumn: sortObj.column,
-      sortDirection: sortObj.direction
-    });
-  }
-
-  const [txnDataLoading, setTxnDataLoading] = useState<boolean>(true);
-  const handleError = useErrorHandler();
-
-  const breakpoint = useBreakpoint({ssr: false});
-  const [selectedRowIndex, setSelectedRowIndex] = useState(-1);
-
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
-  const pagination = React.useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-    }),
-    [pageIndex, pageSize]
-  );
-
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  }, [pageIndex, pageSize, columnFilters, sorting]);
 
   const columns = useMemo<CustomColumnDef<Txn>[]>(() => [{
     id: 'type',
@@ -134,24 +98,28 @@ export const BitcoinTxnTable = () => {
     header: () => <chakra.span> Type </chakra.span>,
     cell: info => info.getValue(),
     fieldType: 'select',
-    options: ["generate", "immature", "receive", "send"]
+    options: ["generate", "immature", "receive", "send"],
+    width: 'auto',
   }, {
     id: 'time',
     accessorKey: 'time',
     header: () => <span> Time </span>,
     cell: info => new Date((info.getValue() as any) * 1000).toLocaleString(),
-    filterFn: 'inNumberRange'
+    width: 'auto',
   }, {
     id: 'amount',
     accessorKey: 'amount',
     header: () => <span> btc </span>,
     cell: info => (info.getValue() as any).toFixed(8),
-    fieldType: 'number'
+    fieldType: 'number',
+    width: '150px',
   }, {
     id: 'txid',
     accessorKey: 'txid',
     header: () => <span> Tx id </span>,
     cell: info => (info.getValue() as any).slice(0, 12) + '...',
+    enableSorting: true,
+    width: 'auto',
   }, {
     id: 'confirmations',
     // accessorKey: 'confirmations',
@@ -159,11 +127,12 @@ export const BitcoinTxnTable = () => {
     header: () => <span> Status </span>,
     cell: (info) => info.cell.row.original.confirmations ===0 ? 'Pending': `Confirmation(${info.cell.row.original.confirmations})`,
     fieldType: 'select',
-    options: ["pending", "confirmed"]
+    options: ["pending", "confirmed"],
+    width: 'auto',
   }, {
     id: 'actions',
-    cell: props => props.row.index === selectedRowIndex ? <Icon as={MdExpandMore} w={6} h={6} />: <Icon as={MdExpandLess} w={6} h={6} />
-
+    cell: props => props.row.index === selectedRowIndex ? <Icon as={MdExpandMore} w={6} h={6} />: <Icon as={MdExpandLess} w={6} h={6} />,
+    width: '50px'
   }], [selectedRowIndex]);
 
   useEffect(() => {
@@ -185,89 +154,21 @@ export const BitcoinTxnTable = () => {
   }, [breakpoint]);
 
 
-  const didMount = useRef(false);
-
-  useEffect(() => {
-    if (!didMount.current) {
-      didMount.current = true;
-      return;
-    }
-
-    onPaginationChange({pageIndex, pageSize});
-  }, [pageIndex, pageSize]);
-
-  useEffect(() => {
-    const filterObj = columnFilters.reduce((prev: any, cur: ColumnFilter & {value: any}) => {
-      switch(cur.id) {
-        case 'type':
-          prev['type'] = cur.value.toLowerCase();
-          break;
-        case 'time':
-          if(cur.value[0] !== undefined) {
-            prev['start'] = new Date(cur.value[0] * 1000).toISOString();
-          }
-
-          if(cur.value[1] !== undefined) {
-            prev['end'] = new Date(cur.value[1] * 1000).toISOString();
-          }
-          break;
-        case 'amount':
-          if(cur.value[0]) {
-            prev['amountMin'] = Number(cur.value[0]);
-          }
-
-          if(cur.value[1]) {
-            prev['amountMax'] = Number(cur.value[1]);
-          }
-          break;
-        case 'confirmations':
-          prev['status'] = cur.value.toLowerCase();
-          break;
-      }
-
-      return prev;
-    }, {} as any);
-
-    onFilterChange(filterObj);
-  }, [columnFilters]);
-
-
-  useEffect(() => {
-    const sortObj = {
-      column: '',
-      direction: ''
-    };
-
-    if(sorting.length === 1) {
-      sortObj.column = sorting[0].id;
-      sortObj.direction = sorting[0].desc ? 'DESC' : 'ASC';
-    }
-
-    onSortChange(sortObj);
-  }, [sorting]);
-
-
   const table = useReactTable({
-    data: Array.isArray(txData) && txData.length === 0 ? dummyTxnDataForSkeleton: txData,
+    data: txnDataLoading ? dummyTxnDataForSkeleton: txData,
     columns,
     state: {
       columnFilters,
-      pagination,
+      pagination: { pageIndex, pageSize },
       sorting,
     },
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    onColumnFiltersChange: setColumnFilters,
     onPaginationChange: setPagination,
     manualPagination: true,
+    manualSorting: true,
+    manualFiltering: true,
     pageCount,
-    debugTable: true,
-    debugHeaders: true,
-    debugColumns: false,
     onSortingChange: setSorting,
   });
 
@@ -279,11 +180,6 @@ export const BitcoinTxnTable = () => {
     }
   }, []);
 
-  // Returns loading on first render, so the client and server match
-  if (!hydrated.current || txnDataLoading) {
-    return <LoadingTable table={table} />;
-  }
-
   return (
     <Widget variant='border' style={{ position: 'relative', overflowX: 'auto' }}>
       <table>
@@ -291,76 +187,86 @@ export const BitcoinTxnTable = () => {
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
-                <th key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    // : flexRender(
-                    //     header.column.columnDef.header,
-                    //     header.getContext()
-                    //   )
-                    :
-                    (
-                      <Flex flexDirection='column' gap={'5px'} marginBottom={'15px'}>
-                      <div
-                        {...{
-                          className: header.column.getCanSort()
-                            ? 'cursor-pointer select-none'
-                            : '',
-                          onClick: header.column.getToggleSortingHandler(),
-                        }}
-                        style={{textAlign: 'center'}}
-                      >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                        {
-                          header.column.getCanSort()
-                          ? header.column.getIsSorted()
-                            ? header.column.getIsSorted() === 'asc'
-                              ? <Icon as={IoChevronUpCircle} />
-                              : <Icon as={IoChevronDownCircle} />
-                            : <Icon as={IoChevronDownCircleOutline} />
-                          : null
-                        }
-                      </div>
-                      {header.column.getCanFilter() ? (
-                        <div style={{display: 'flex', justifyContent: 'center'}}>
-                          <Filter column={header.column} table={table} />
-                        </div>
-                      ) : null}
-                    </Flex>
-                    )
-                  }
-                </th>
-              ))}
+              {headerGroup.headers.map(header => {
+                const columnDef = (header.column.columnDef as CustomColumnDef<Txn>);
+                return (
+                  <th key={header.id} style={{width: columnDef.width}}>
+                    {header.isPlaceholder
+                      ? null
+                      :
+                      (
+                        <Flex flexDirection='column' gap={'5px'} marginBottom={'15px'}>
+                          <div
+                            {...{
+                              className: header.column.getCanSort()
+                                ? 'cursor-pointer select-none'
+                                : '',
+                                onClick: header.column.getToggleSortingHandler(),
+                            }}
+                            style={{textAlign: 'center'}}
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                            {
+                              header.column.getCanSort()
+                                ? header.column.getIsSorted()
+                                ? header.column.getIsSorted() === 'asc'
+                                ? <Icon as={IoChevronUpCircle} />
+                                : <Icon as={IoChevronDownCircle} />
+                                : <Icon as={IoChevronDownCircleOutline} />
+                                : null
+                            }
+                          </div>
+                          {header.column.getCanFilter() ? (
+                            <div style={{display: 'flex', justifyContent: 'center'}}>
+                              <Filter selectedDates={selectedDates} setSelectedDates={setSelectedDates} column={header.column} table={table} loading={!hydrated.current || txnDataLoading} />
+                            </div>
+                          ) : null}
+                        </Flex>
+                      )
+                    }
+                  </th>
+              )})}
             </tr>
           ))}
         </thead>
 
-        <tbody>
-          {table.getRowModel().rows.map((row, index: number) => (
+        {
+          !hydrated.current || txnDataLoading
+          ?
+            <LoadingTable table={table} />
+          :
+            <tbody>
 
-            <React.Fragment key={row.id}>
-              <tr onClick={ () => selectedRowIndex === index ? setSelectedRowIndex(-1) : setSelectedRowIndex(index) } style={{ 'cursor': 'pointer' }}>
-                {row.getVisibleCells().map(cell => (
-                  <Cell key={cell.id} textAlign='center'>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </Cell>
-                ))}
-              </tr>
+            {table.getCoreRowModel().rows.length === 0 ? <tr> <chakra.th colSpan={5} textAlign="center" pt={12} pb={8}>
+              <h2> Empty results </h2> 
+              <h6> Refine your filters </h6> 
+            </chakra.th> </tr> : null }
 
-              { index === selectedRowIndex ? <tr>
-                <td colSpan={5}>
-                  <TxnDetail row={row} />
-                </td>
-              </tr>: null}
+            {table.getCoreRowModel().rows.map((row, index: number) => (
 
-            </React.Fragment>
+              <React.Fragment key={row.id}>
+                <tr onClick={ () => selectedRowIndex === index ? setSelectedRowIndex(-1) : setSelectedRowIndex(index) } style={{ 'cursor': 'pointer' }}>
+                  {row.getVisibleCells().map(cell => (
+                    <Cell key={cell.id} textAlign={cell.id.includes('actions') ? 'left': 'center'}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </Cell>
+                  ))}
+                </tr>
 
-          ))}
-        </tbody>
+                { index === selectedRowIndex ? <tr>
+                  <td colSpan={5}>
+                    <TxnDetail row={row} />
+                  </td>
+                </tr>: null}
+
+              </React.Fragment>
+
+            ))}
+          </tbody>
+        }
 
       </table>
 
@@ -457,37 +363,30 @@ const Paginator = ({table}: PaginatorProps) => {
 
 type FilterProps = PropsWithChildren & {
   column: Column<any, unknown>,
-  table: Table<Txn>
+  table: Table<Txn>,
+  selectedDates: Date[],
+  setSelectedDates: Function,
+  loading?: boolean
 };
 
 function Filter({
   column,
   table,
+  selectedDates,
+  setSelectedDates,
+  loading
 }: FilterProps) {
-  const firstValue = table
-    .getPreFilteredRowModel()
-    .flatRows[0]?.getValue(column.id)
-
   const columnFilterValue = column.getFilterValue()
 
-  let sortedUniqueValues = React.useMemo(
-    () =>
-      column.id === "confirmations"
-      ? ["Pending", "Confirmed"]
-      : typeof firstValue === 'number'
-        ? []
-        : Array.from(column.getFacetedUniqueValues().keys()).sort(),
-    [column.getFacetedUniqueValues()]
-  )
-
-  const [selectedDates, setSelectedDates] = useState<Date[]>([new Date(), new Date()]);
-
   const columnDef = (column.columnDef as CustomColumnDef<Txn>);
+
+  const disabled = loading;
 
   return columnDef.fieldType === "select"
   ? (
     <div>
       <Select
+        disabled={disabled}
         placeholder='Select a value'
         onChange={(e) => {
           column.setFilterValue(e.target.value);
@@ -504,13 +403,15 @@ function Filter({
     <div>
       <Flex gap={'10px'} className="flex space-x-2" justifyContent='center' marginLeft='20px'>
         <DebouncedInput
+          disabled={disabled}
           type="number"
-          width={{base: '100px', md: '125px'}}
+          width={{base: '100px', md: '82px'}}
           min={Number(column.getFacetedMinMaxValues()?.[0] ?? '')}
           max={Number(column.getFacetedMinMaxValues()?.[1] ?? '')}
           value={(columnFilterValue as [number, number])?.[0] ?? ''}
-          onChange={value =>
+          onChange={value =>{
             column.setFilterValue((old: [number, number]) => [value, old?.[1]])
+          }
           }
           placeholder={`Min ${
             column.getFacetedMinMaxValues()?.[0]
@@ -520,13 +421,15 @@ function Filter({
           className="w-24 border shadow rounded"
         />
         <DebouncedInput
-          width={{base: '100px', md: '125px'}}
+          disabled={disabled}
+          width={{base: '100px', md: '82px'}}
           type="number"
           min={Number(column.getFacetedMinMaxValues()?.[0] ?? '')}
           max={Number(column.getFacetedMinMaxValues()?.[1] ?? '')}
           value={(columnFilterValue as [number, number])?.[1] ?? ''}
-          onChange={value =>
+          onChange={value =>{
             column.setFilterValue((old: [number, number]) => [old?.[0], value])
+          }
           }
           placeholder={`Max ${
             column.getFacetedMinMaxValues()?.[1]
@@ -541,34 +444,30 @@ function Filter({
   ) : column.id === "time" ? (
     <div style={{ marginLeft: '20px' }}>
       <RangeDatepicker
+        disabled={disabled}
         propsConfigs={{
           inputProps: {
             width: '225px'
           }
         }}
         selectedDates={selectedDates}
-        onDateChange={(selectedDates: Date[]) => {
+        onDateChange={(selectedDateRange: Date[]) => {
+          let dates = selectedDateRange;
 
-          let dates = selectedDates;
-
-          if(selectedDates.length === 1) {
-            dates = [selectedDates[0], new Date()];
+          if(selectedDateRange.length === 1) {
+            dates = [selectedDateRange[0], new Date()];
           }
 
           column.setFilterValue(() => dates.map((date: Date) => (date.valueOf()/1000)));
-          setSelectedDates(selectedDates);
+          setSelectedDates(selectedDateRange);
         }}
       />
       <div className="h-1" />
     </div>
   ) : (
     <div style={{ marginLeft: '20px', marginRight: '20px' }}>
-      <datalist id={column.id + 'list'}>
-        {sortedUniqueValues.slice(0, 5000).map((value: any) => (
-          <option value={value} key={value} />
-        ))}
-      </datalist>
       <DebouncedInput
+        disabled={disabled}
         width={{base: '150px', md: '200px'}}
         type="text"
         value={(columnFilterValue ?? '') as string}
@@ -584,42 +483,43 @@ function Filter({
   )
 }
 
-// A debounced input react component
-type DebouncedInputProps = PropsWithChildren & Omit<InputProps, 'onChange' | 'width'> & {
-  value: string | number
-  onChange: (value: string | number) => void,
-  width?: any,
-  debounce?: number
-};
-
-function DebouncedInput({
-  value: initialValue,
-  onChange,
-  debounce = 500,
-  ...props
-}: DebouncedInputProps ) {
-  const [value, setValue] = React.useState(initialValue)
-
-  React.useEffect(() => {
-    setValue(initialValue)
-  }, [initialValue])
-
-  React.useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(value)
-    }, debounce)
-
-    return () => clearTimeout(timeout)
-  }, [value])
-
-  return (
-    <Input {...props} value={value} onChange={e => setValue(e.target.value)} />
-  )
-}
-
-
 const BitcoinTxnTableWithErrorBoundary = withErrorBoundary(BitcoinTxnTable, {
   fallbackRender: (fallbackProps) => (<ErrorBoundaryFallback {...fallbackProps} title='Transaction table' />)
 });
 
 export default BitcoinTxnTableWithErrorBoundary;
+
+function reduceColumnFilters(columnFilters: ColumnFiltersState) {
+  return columnFilters.reduce((prev: any, cur: ColumnFilter & {value: any}) => {
+    switch(cur.id) {
+      case 'type':
+      prev['type'] = cur.value.toLowerCase();
+        break;
+      case 'time':
+      if(cur.value[0] !== undefined) {
+        prev['start'] = new Date(cur.value[0] * 1000).toISOString();
+      }
+
+        if(cur.value[1] !== undefined) {
+          prev['end'] = new Date(cur.value[1] * 1000).toISOString();
+        }
+        break;
+      case 'amount':
+      if(cur.value[0]) {
+        prev['amountMin'] = Number(cur.value[0]);
+      }
+
+        if(cur.value[1]) {
+          prev['amountMax'] = Number(cur.value[1]);
+        }
+        break;
+      case 'confirmations':
+      prev['status'] = cur.value.toLowerCase();
+        break;
+    }
+
+    return prev;
+  }, {} as any);
+
+
+}

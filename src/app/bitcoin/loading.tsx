@@ -1,9 +1,7 @@
 'use client';
 
-import {Flex} from "@chakra-ui/react";
+import PageLoader  from "@shared/components/PageLoader";
 
 export default function Loading() {
-  return (<Flex>
-    Bitcoin Loading...
-  </Flex>);
+  return <PageLoader text='Loading Bitcoin...' />
 }

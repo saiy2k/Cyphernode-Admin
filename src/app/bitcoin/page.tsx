@@ -37,7 +37,7 @@ export default function Bitcoin() {
         {showReceive ? <BitcoinReceiveWidget /> : null }
       </Box>
 
-      <h2 style={{marginTop: 30, marginBottom: 15}}> Transactions </h2>
+      <h2 style={{marginTop: 10, marginBottom: 15}}> Transactions </h2>
       
       <BitcoinTxnTable />
 

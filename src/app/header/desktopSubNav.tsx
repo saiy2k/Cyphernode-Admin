@@ -1,7 +1,9 @@
 import { Box, Divider } from '@chakra-ui/react'
-import { NavItem } from './header.data';
 
 import { Text, Link } from '@chakra-ui/react';
+import { default as NLink } from 'next/link';
+
+import { NavItem } from './header.data';
 
 export const DesktopSubNav = ({ label, href }: NavItem) => {
 
@@ -12,10 +14,12 @@ export const DesktopSubNav = ({ label, href }: NavItem) => {
   }
 
   return (
-    <Link href={href} role={'group'} variant='subMenu'>
-      <Text variant='subMenu'>
-        {label}
-      </Text>
+    <Link as='span' role={'group'} variant='subMenu'>
+      <NLink href={href ?? '#'} prefetch={false}>
+        <Text variant='subMenu'>
+          {label}
+        </Text>
+      </NLink>
     </Link>
   );
 

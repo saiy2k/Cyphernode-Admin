@@ -42,13 +42,13 @@ export type BlockInfo = {
   warnings: string;
 }
 
-export interface FeeType extends ButtonGroupOptions { };
+export interface ConfTarget extends ButtonGroupOptions { };
 
 export interface AmountType extends ButtonGroupOptions { };
 
 export interface AddressType  extends ButtonGroupOptions { };
 
-export type CustomColumnDef<T> = ColumnDef<T> & { fieldType?: string, options?: any[] }
+export type CustomColumnDef<T> = ColumnDef<T> & { fieldType?: string, options?: any[], width: string }
 
 export type DetailCell = {
   title: string,
@@ -65,4 +65,5 @@ export { type SuccessResponse, type ErrorResponse } from './api.types';
 export type SpendCoinPayload = {
   address: string,
   amount: number,
+  confTarget: number
 };

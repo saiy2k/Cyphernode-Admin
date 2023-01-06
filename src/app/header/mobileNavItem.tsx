@@ -1,5 +1,3 @@
-import { NavItem } from './header.data';
-
 import {
   Box,
   Collapse,
@@ -12,8 +10,11 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react';
+import { default as NLink } from 'next/link';
 
 import { BiChevronDown } from 'react-icons/bi';
+
+import { NavItem } from './header.data';
 
 export const MobileNavItem = ({ label, children, href }: NavItem) => {
   const { isOpen, onToggle } = useDisclosure();
@@ -21,17 +22,17 @@ export const MobileNavItem = ({ label, children, href }: NavItem) => {
   return (
     <Stack spacing={4} onClick={children && onToggle}>
       <Flex
-        as={Link}
-        href={href ?? '#'}
         py={2}
         justify={'space-between'}
         align={'center'}
         _hover={{
           textDecoration: 'none',
         }}>
-        <Text variant='mainMenuMobile'>
-          {label}
-        </Text>
+        <NLink href={href ?? '#'}>
+          <Text variant='mainMenuMobile'>
+            {label}
+          </Text>
+        </NLink>
         {children && (
           <Icon
             as={BiChevronDown}

@@ -1,6 +1,6 @@
 'use client';
 
-import { Image, useColorMode } from '@chakra-ui/react'
+import { useColorMode } from '@chakra-ui/react'
 import { HiBell } from 'react-icons/hi';
 import { FaUser } from 'react-icons/fa';
 import { BsSunFill } from 'react-icons/bs';
@@ -17,6 +17,7 @@ import {
   Collapse,
   useColorModeValue,
   useDisclosure,
+  chakra,
 } from '@chakra-ui/react';
 
 import { DesktopMainNav } from './desktopMainNav';
@@ -55,7 +56,7 @@ export default function WithSubnavigation() {
         align={'center'}>
 
         <Flex justify={{ base: 'start', md: 'start' }} color={useColorModeValue('gray.800', 'gray.200')}>
-          <h1> Cyphernode admin </h1>
+          <chakra.h1 fontSize={{ base: '1em', lg: '1.2em' }}> Cyphernode admin </chakra.h1>
           { /*
           <Image
             src={useColorModeValue('/logo.svg', '/logo-white.svg')}
