@@ -26,6 +26,16 @@ export type Txn = {
   trusted?: boolean;
 }
 
+export type Watch = {
+  id: number;
+  address: string;
+  imported: boolean;
+  unconfirmedCallbackURL: string;
+  confirmedCallbackURL: string;
+  label: string;
+  watching_since: string;
+};
+
 export type BlockInfo = {
   chain: string;
   blocks: number;

@@ -77,3 +77,13 @@ export const dummyTxnDataForSkeleton = new Array(10).fill({
     abandoned: true,
     trusted: true,
 });
+
+export const dummyWatchDataForSkeleton = new Array(10).fill({
+  id: 0,
+  address: '',
+  imported: false,
+  unconfirmedCallbackURL: '',
+  confirmedCallbackURL: '',
+  label: '',
+  watching_since: '',
+});

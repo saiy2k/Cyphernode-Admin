@@ -19,7 +19,8 @@ const urlAndApiId: any = {
   getblockchaininfo: API_ID.ONE,
   getbalance: API_ID.TWO,
   getnewaddress: API_ID.TWO,
-  spend: API_ID.TWO
+  spend: API_ID.TWO,
+  getactivewatches: API_ID.ONE,
 };
 
 export function generateKey(url: string) {
