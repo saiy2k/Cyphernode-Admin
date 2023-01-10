@@ -77,3 +77,19 @@ export type SpendCoinPayload = {
   amount: number,
   confTarget: number
 };
+
+type WatchPayload = {
+  label?: string,
+  confirmedCallbackURL: string,
+  unconfirmedCallbackURL: string,
+}
+
+export type WatchAddressPayload = {
+  address: string,
+} & WatchPayload;
+
+export type WatchXPubPayload = {
+  pub32: string,
+  path?: string,
+  nStart?: number,
+} & WatchPayload;

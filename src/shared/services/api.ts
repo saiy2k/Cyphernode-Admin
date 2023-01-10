@@ -32,7 +32,7 @@ export const getCallProxy = (urlFragment: string, query: any = {}): Promise<any>
 
 export const postCallProxy = (urlFragment: string, payload: any): Promise<any> => {
 
-  let url = `api/${urlFragment}`
+  let url = `/api/${urlFragment}`
 
   return fetch(url, {
     method: 'POST',

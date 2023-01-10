@@ -21,6 +21,8 @@ const urlAndApiId: any = {
   getnewaddress: API_ID.TWO,
   spend: API_ID.TWO,
   getactivewatches: API_ID.ONE,
+  watch: API_ID.TWO,
+  watchxpub: API_ID.TWO,
 };
 
 export function generateKey(url: string) {

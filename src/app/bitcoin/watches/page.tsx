@@ -2,24 +2,32 @@
 
 import { useState } from 'react';
 
-import { Button, Flex } from '@chakra-ui/react';
+import { Box, Button, Flex } from '@chakra-ui/react';
 
 import { 
   BitcoinWatchTable,
   Widget
 } from '@shared/components/index';
+import WatchForm from '@shared/components/bitcoin/WatchForm';
 
 export default function Watches() {
 
   console.log('Render: Bitcoin watches page');
-  const [showSend, setShowSend] = useState<boolean>(false);
-  const [showReceive, setShowReceive] = useState<boolean>(false);
+  const [showWatchForm, setShowWatchForm] = useState<boolean>(true);
 
   return (
     <Widget>
       <Flex justifyContent='end' flexDirection={{base: 'column', sm: 'row'}} gap={{base: 10}} >
-          <Button width={{base: '50%', sm: 200}} h={12} onClick={() => setShowSend(!showSend) }> + Add a watch </Button>
+          <Button width={{base: '50%', sm: 200}} h={12} onClick={() => setShowWatchForm(!showWatchForm) }> + Add a watch </Button>
       </Flex>
+
+      <Box display='flex' flexDirection='column' gap='30px' marginTop={'30px'} marginX='auto' maxWidth={{base: '100%', xl: '80%', xxl: '45%'}}>
+        {
+          showWatchForm
+          ? <WatchForm />
+          : null
+        }
+      </Box>
 
       <Flex justifyContent='stretch' gap='10px'>
         <div>
