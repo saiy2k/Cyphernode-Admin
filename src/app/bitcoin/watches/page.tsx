@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Box, Button, Flex } from '@chakra-ui/react';
 
@@ -32,11 +32,11 @@ export default function Watches() {
       <Flex justifyContent='stretch' gap='10px'>
         <div>
           <h2 style={{marginTop: 10, marginBottom: 15}}> By address </h2>
-          <BitcoinWatchTable />
+          { useMemo(() => <BitcoinWatchTable />, []) }
         </div>
         <div>
           <h2 style={{marginTop: 10, marginBottom: 15}}> By *pub </h2>
-          <BitcoinWatchTable />
+          { useMemo(() => <BitcoinWatchTable />, []) }
         </div>
       </Flex>
 

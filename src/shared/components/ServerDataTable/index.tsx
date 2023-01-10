@@ -2,11 +2,8 @@ import React, { ReactNode, PropsWithChildren, useEffect, useMemo, useRef, useSta
 
 import {
   chakra,
-  Button,
   Flex,
   Icon,
-  Input,
-  Select,
   useBreakpoint,
 } from '@chakra-ui/react';
 
@@ -21,13 +18,12 @@ import {
   useReactTable,
   SortingState,
 } from '@tanstack/react-table';
-import { RangeDatepicker } from 'chakra-dayzed-datepicker';
 
 import { Widget, Cell } from '@shared/components/index';
 import { CustomColumnDef } from '@shared/types';
-import { dummyTxnDataForSkeleton } from '@shared/constants';
 
-import { LoadingTable } from './bitcoin/TxnLoadingTable';
+import { SkeletonTable } from '@shared/components/SkeletonTable';
+import { Paginator } from '@shared/components/ServerDataTable/Paginator';
 
 export type FilterProps<T> = PropsWithChildren & {
   column: Column<any, unknown>,
@@ -43,12 +39,16 @@ export type ServerDataTableProps<T> = PropsWithChildren & {
   DetailComp: any,
 
   data: Array<T>,
+  dummyDataForSkeleton: Array<T>,
   columnDef: CustomColumnDef<T>[],
-  filers?: any
+  filter?: any
   paginationConfig?: any,
   isLoading: boolean,
   columnsToHideInMobile?: Array<string>,
+  pageCount: number,
 
+  // FilterControl?: ((pros: FilterProps<T>) => React.ReactNode),
+  FilterControl?: any,
   columnFilters: ColumnFiltersState
   pageIndex: number,
   pageSize: number,
@@ -59,15 +59,17 @@ export type ServerDataTableProps<T> = PropsWithChildren & {
   onSortingChange: any,
 };
 
-// export const ServerDataTable = ({
 export default function ServerDataTable<T>({
   DetailComp,
 
   data,
+  dummyDataForSkeleton,
   columnDef,
   isLoading,
   columnsToHideInMobile = [],
+  pageCount,
 
+  FilterControl,
   columnFilters,
   pageIndex,
   pageSize,
@@ -79,12 +81,11 @@ export default function ServerDataTable<T>({
 
 }: ServerDataTableProps<T>) {
 
-  console.log('Render: ServerDataTable');
-
-  const [ pageCount, setPageCount ] = useState(0);
+  console.log('Render: ServerDataTable', data.length);
 
   const breakpoint = useBreakpoint({ssr: false});
   const [selectedRowIndex, setSelectedRowIndex] = useState<number>(-1);
+  const [selectedDates, setSelectedDates] = useState<Date[]>([new Date(), new Date()]);
 
   const columns = useMemo<CustomColumnDef<T>[]>(() => [
     ...columnDef,
@@ -115,7 +116,7 @@ export default function ServerDataTable<T>({
 
 
   const table = useReactTable({
-    data: isLoading ? dummyTxnDataForSkeleton: data,
+    data: isLoading ? dummyDataForSkeleton: data,
     columns,
     state: {
       columnFilters,
@@ -165,6 +166,7 @@ export default function ServerDataTable<T>({
                             }}
                             style={{textAlign: 'center'}}
                           >
+
                             {flexRender(
                               header.column.columnDef.header,
                               header.getContext()
@@ -179,9 +181,9 @@ export default function ServerDataTable<T>({
                                 : null
                             }
                           </div>
-                          {header.column.getCanFilter() ? (
+                          {FilterControl && header.column.getCanFilter() ? (
                             <div style={{display: 'flex', justifyContent: 'center'}}>
-                              Filter
+                              <FilterControl selectedDates={selectedDates} setSelectedDates={setSelectedDates} column={header.column} table={table} loading={!hydrated.current || isLoading} />
                             </div>
                           ) : null}
                         </Flex>
@@ -196,7 +198,7 @@ export default function ServerDataTable<T>({
         {
           !hydrated.current || isLoading
           ?
-            <LoadingTable table={table} />
+            <SkeletonTable table={table} />
           :
             <tbody>
 
@@ -234,89 +236,4 @@ export default function ServerDataTable<T>({
 
     </Widget>
   )
-}
-
-type PaginatorProps = PropsWithChildren & {
-  table: Table<any>
-};
-
-const Paginator = ({table}: PaginatorProps) => {
-  return (
-    <>
-      <Flex flexDirection={{base: 'column-reverse', md: 'row'}} my={2} w='100%' justifyContent='end' alignItems={{base: 'flex-start',md: 'center'}} gap={5} marginTop={'25px'}>
-
-        <chakra.span justifySelf='start'>
-          <span>Page: </span>
-          <strong>
-            {table.getState().pagination.pageIndex + 1} of{' '}
-            {table.getPageCount()}
-          </strong>
-        </chakra.span>
-
-        <span className="flex items-center gap-1">
-          Go to
-          <Input
-            size='sm'
-            ml={2}
-            width='100px'
-            type="number"
-            defaultValue={table.getState().pagination.pageIndex + 1}
-            onChange={e => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0
-              table.setPageIndex(page)
-            }}
-          />
-        </span>
-        <Select
-          size='sm'
-          w='120px'
-          value={table.getState().pagination.pageSize}
-          onChange={e => {
-            table.setPageSize(Number(e.target.value))
-          }}
-        >
-          {[10, 25, 50, 100].map(pageSize => (
-            <option key={pageSize} value={pageSize}>
-              Show {pageSize}
-            </option>
-          ))}
-        </Select>
-
-        <Flex gap={2}>
-          <Button
-            size='sm'
-            variant='outline'
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-          >
-            {'<<'}
-          </Button>
-          <Button
-            size='sm'
-            variant='outline'
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            {'<'}
-          </Button>
-          <Button
-            size='sm'
-            variant='outline'
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            {'>'}
-          </Button>
-          <Button
-            size='sm'
-            variant='outline'
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-          >
-            {'>>'}
-          </Button>
-        </Flex>
-      </Flex>
-    </>
-  );
 }

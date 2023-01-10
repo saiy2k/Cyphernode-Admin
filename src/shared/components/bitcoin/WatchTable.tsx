@@ -26,8 +26,8 @@ import ServerDataTable, { FilterProps } from '../ServerDataTable';
 import { WatchDetail } from './WatchTableDetail';
 
 import { DebouncedInput } from 'shared/components/DebouncedInput';
+import { RangeDatepicker } from 'chakra-dayzed-datepicker';
 
-// TODO: Move this file, TxnLoadingTable into /shared/components/txn-table/*
 export const BitcoinWatchTable = () => {
 
   console.log('Render: BitcoinWatchTable');
