@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
   Box,
@@ -17,6 +17,7 @@ import { useErrorHandler, withErrorBoundary } from 'react-error-boundary';
 
 import { 
   ButtonGroup,
+  ErrorOverlay,
   Widget,
 } from '@shared/components/index';
 import { getCallProxy } from '@shared/services/api';
@@ -31,17 +32,18 @@ const BitcoinReceiveWidget = () => {
   const [address, setAddress] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const {onCopy, setValue: setClipboardValue } = useClipboard("");
+  const [error, setError] = useState<string | null>(null);
 
   const handleError = useErrorHandler();
 
   const toast = useToast();
 
-  const generateAddress = async (addType: string) => {
+  const generateAddress = useCallback(async () => {
     console.log('Receive Widget :: generateAddress');
     // setAType(addType);
     setLoading(true);
     try {
-      const serverResp = await getCallProxy(`getnewaddress/${addType}`);
+      const serverResp = await getCallProxy(`getnewaddress/${aType}`);
       if (!serverResp.ok) {
         throw new Error(serverResp.status + ': ' + serverResp.statusText);
       }
@@ -49,16 +51,21 @@ const BitcoinReceiveWidget = () => {
       setAddress(response.address);
       setClipboardValue(response.address);
     } catch (err: unknown) {
-      handleError(err);
+      // handleError(err);
+      if (typeof err === 'string') {
+        setError(err);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
-  }
+  }, [aType, handleError, setClipboardValue]);
 
   useEffect(() => {
     console.log('Receive Widget :: useEffect');
-    generateAddress(aType);
-  }, [aType]);
+    generateAddress();
+  }, [generateAddress]);
 
   const onClipboardCopy = () => {
     onCopy();
@@ -113,6 +120,7 @@ const BitcoinReceiveWidget = () => {
         </Box>
       </Flex>
 
+      {error ? <ErrorOverlay onReset={ () => setError(null)}> { error } </ErrorOverlay>: null }
     </Widget>
   )
 }
