@@ -15,7 +15,7 @@ export const DesktopSubNav = ({ label, href }: NavItem) => {
 
   return (
     <Link as='span' role={'group'} variant='subMenu'>
-      <NLink href={href ?? '#'} prefetch={false}>
+      <NLink href={href ?? '#'}>
         <Text variant='subMenu'>
           {label}
         </Text>

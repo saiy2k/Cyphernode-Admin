@@ -19,18 +19,20 @@ export const getCallA = (urlFragment: string): Promise<any> => {
 export const getCallProxy = (urlFragment: string, query: any = {}): Promise<any> => {
   const queryString = new URLSearchParams(query);
 
-  let url = `api/${urlFragment}`
+  let url = `/api/${urlFragment}`;
 
   if(Object.keys(query).length > 0) {
     url += `?${queryString.toString()}`;
   }
+
+  // console.log('getCallProxy: ', url);
 
   return fetch(url);
 }
 
 export const postCallProxy = (urlFragment: string, payload: any): Promise<any> => {
 
-  let url = `api/${urlFragment}`
+  let url = `/api/${urlFragment}`
 
   return fetch(url, {
     method: 'POST',

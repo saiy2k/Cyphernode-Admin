@@ -26,6 +26,16 @@ export type Txn = {
   trusted?: boolean;
 }
 
+export type Watch = {
+  id: number;
+  address: string;
+  imported: boolean;
+  unconfirmedCallbackURL: string;
+  confirmedCallbackURL: string;
+  label: string;
+  watching_since: string;
+};
+
 export type BlockInfo = {
   chain: string;
   blocks: number;
@@ -67,3 +77,19 @@ export type SpendCoinPayload = {
   amount: number,
   confTarget: number
 };
+
+type WatchPayload = {
+  label?: string,
+  confirmedCallbackURL: string,
+  unconfirmedCallbackURL: string,
+}
+
+export type WatchAddressPayload = {
+  address: string,
+} & WatchPayload;
+
+export type WatchXPubPayload = {
+  pub32: string,
+  path?: string,
+  nStart?: number,
+} & WatchPayload;

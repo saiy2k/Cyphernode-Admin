@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Box, Button, Flex } from '@chakra-ui/react';
 
@@ -39,7 +39,7 @@ export default function Bitcoin() {
 
       <h2 style={{marginTop: 10, marginBottom: 15}}> Transactions </h2>
       
-      <BitcoinTxnTable />
+      { useMemo(() =>  <BitcoinTxnTable />, []) }
 
     </Widget>
   )

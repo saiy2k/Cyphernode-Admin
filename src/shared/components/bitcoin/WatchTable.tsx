@@ -12,24 +12,24 @@ import {
   ColumnFilter,
   SortingState,
 } from '@tanstack/react-table';
-import { RangeDatepicker } from 'chakra-dayzed-datepicker';
 import { useErrorHandler, withErrorBoundary } from 'react-error-boundary';
 
-import { CustomColumnDef, Txn, SuccessResponse } from '@shared/types';
-import { TxnDetail } from './TxnTableDetail';
-import { dummyTxnDataForSkeleton } from '@shared/constants';
+import { CustomColumnDef, Watch } from '@shared/types';
 import { getCallProxy } from '@shared/services/api';
 import { ErrorBoundaryFallback } from '../ErrorBoundaryFallback';
+
+import ServerDataTable, { FilterProps } from '../ServerDataTable';
+import { WatchDetail } from './WatchTableDetail';
+
 import { DebouncedInput } from 'shared/components/DebouncedInput';
+import { RangeDatepicker } from 'chakra-dayzed-datepicker';
 
-import ServerDataTable, { FilterProps } from '@shared/components/ServerDataTable';
+export const BitcoinWatchTable = () => {
 
-export const BitcoinTxnTable = () => {
+  console.log('Render: BitcoinWatchTable');
 
-  console.log('Render: BitcoinTxnTable');
-
-  const [ txData, setTxData ] = useState<Txn[]>([]);
-  const [ txnDataLoading, setTxnDataLoading ] = useState<boolean>(true);
+  const [ watchData, setWatchData ] = useState<Watch[]>([]);
+  const [ dataLoading, setDataLoading ] = useState<boolean>(true);
   const [ pageCount, setPageCount ] = useState(0);
 
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
@@ -46,28 +46,28 @@ export const BitcoinTxnTable = () => {
 
   useEffect(() => {
 
-    setTxnDataLoading(true);
+    setDataLoading(true);
 
     (async() => {
-      console.log('Home :: useEffect :: call API :: txns');
+      console.log('Home :: useEffect :: call API :: getactivewatches');
       try {
 
         const filters = reduceColumnFilters(columnFilters);
         const sortColumn = sorting.length === 1 ? sorting[0].id : '';
         const sortDirection = sorting.length === 1 ? sorting[0].desc ? 'DESC' : 'ASC' : '';
 
-        const response = await getCallProxy('txns', { perPage: pageSize, page: pageIndex, ...filters, sortColumn, sortDirection });
+        const response = await getCallProxy('getactivewatches');
         if (!response.ok) {
           const bodyResp = await response.json();
           throw new Error(response.status + ': ' + response.statusText + ': ' + JSON.stringify(bodyResp));
         }
-        const txns: SuccessResponse = await response.json();
-        setTxData(txns.data);
-        setPageCount(txns.meta.pageCount);
-        setTxnDataLoading(false);
+        const watches = await response.json();
+        setWatchData(watches.watches);
+        setPageCount(watches.watches.pageCount);
+        setDataLoading(false);
       } catch(err) {
-        setTxnDataLoading(false);
-        setTxData([]);
+        setDataLoading(false);
+        setWatchData([]);
         setPageCount(0);
         handleError(err);
       }
@@ -75,16 +75,34 @@ export const BitcoinTxnTable = () => {
 
   }, [pageIndex, pageSize, columnFilters, sorting]);
 
+  const columns = [{
+    id: 'id',
+    accessorKey: 'id',
+    header: () => <chakra.span> # </chakra.span>,
+    cell: (info: any) => info.getValue(),
+    width: '50px',
+    enableColumnFilter: false,
+    enableSorting: false,
+  }, {
+    id: 'address',
+    accessorKey: 'address',
+    header: () => <span> Address </span>,
+    cell: (info: any) => (info.getValue() as any).slice(0, 12) + '...',
+    width: 'auto',
+  }, {
+    id: 'label',
+    accessorKey: 'label',
+    header: () => <span> Label </span>,
+    cell: (info: any) => info.getValue(),
+    width: 'auto',
+  }];
+
   return (
     <ServerDataTable
-      data={txData} 
-      dummyDataForSkeleton={dummyTxnDataForSkeleton}
-      isLoading={txnDataLoading}
+      data={watchData} 
+      isLoading={false}
       columnDef={columns}
-      columnsToHideInMobile={['txid', 'confirmations']}
-      pageCount={pageCount}
 
-      FilterControl={Filter}
       columnFilters={columnFilters}
       pageIndex={pageIndex}
       pageSize={pageSize}
@@ -94,50 +112,51 @@ export const BitcoinTxnTable = () => {
       onPaginationChange={setPagination}
       onSortingChange={setSorting}
 
-      DetailComp={TxnDetail}
+      DetailComp={WatchDetail}
     />
-  );
-
+  )
 }
 
-const columns = [{
-  id: 'type',
-  accessorKey: 'category',
-  header: () => <chakra.span> Type </chakra.span>,
-  cell: (info: any) => info.getValue(),
-  fieldType: 'select',
-  options: ["generate", "immature", "receive", "send"],
-  width: 'auto',
-}, {
-  id: 'time',
-  accessorKey: 'time',
-  header: () => <span> Time </span>,
-  cell: (info: any) => new Date((info.getValue() as any) * 1000).toLocaleString(),
-  width: 'auto',
-}, {
-  id: 'amount',
-  accessorKey: 'amount',
-  header: () => <span> btc </span>,
-  cell: (info: any) => (info.getValue() as any).toFixed(8),
-  fieldType: 'number',
-  width: '150px',
-}, {
-  id: 'txid',
-  accessorKey: 'txid',
-  header: () => <span> Tx id </span>,
-  cell: (info: any) => (info.getValue() as any).slice(0, 12) + '...',
-  enableSorting: true,
-  width: 'auto',
-}, {
-  id: 'confirmations',
-  // accessorKey: 'confirmations',
-  accessorFn: (row: any) => (Boolean(row.confirmations) && row.confirmations > 0) ?'Confirmed': 'Pending',
-  header: () => <span> Status </span>,
-  cell: (info: any) => info.cell.row.original.confirmations ===0 ? 'Pending': `Confirmation(${info.cell.row.original.confirmations})`,
-  fieldType: 'select',
-  options: ["pending", "confirmed"],
-  width: 'auto',
-}];
+const BitcoinWatchTableWithErrorBoundary = withErrorBoundary(BitcoinWatchTable, {
+  fallbackRender: (fallbackProps) => (<ErrorBoundaryFallback {...fallbackProps} title='Watch table' />)
+});
+
+export default BitcoinWatchTableWithErrorBoundary;
+
+function reduceColumnFilters(columnFilters: ColumnFiltersState) {
+  return columnFilters.reduce((prev: any, cur: ColumnFilter & {value: any}) => {
+    switch(cur.id) {
+      case 'type':
+      prev['type'] = cur.value.toLowerCase();
+        break;
+      case 'time':
+      if(cur.value[0] !== undefined) {
+        prev['start'] = new Date(cur.value[0] * 1000).toISOString();
+      }
+
+        if(cur.value[1] !== undefined) {
+          prev['end'] = new Date(cur.value[1] * 1000).toISOString();
+        }
+        break;
+      case 'amount':
+      if(cur.value[0]) {
+        prev['amountMin'] = Number(cur.value[0]);
+      }
+
+        if(cur.value[1]) {
+          prev['amountMax'] = Number(cur.value[1]);
+        }
+        break;
+      case 'confirmations':
+      prev['status'] = cur.value.toLowerCase();
+        break;
+    }
+
+    return prev;
+  }, {} as any);
+
+
+}
 
 function Filter({
   column,
@@ -145,10 +164,10 @@ function Filter({
   selectedDates,
   setSelectedDates,
   loading
-}: FilterProps<Txn>) {
+}: FilterProps<Watch>) {
   const columnFilterValue = column.getFilterValue()
 
-  const columnDef = (column.columnDef as CustomColumnDef<Txn>);
+  const columnDef = (column.columnDef as CustomColumnDef<Watch>);
 
   const disabled = loading;
 
@@ -253,43 +272,3 @@ function Filter({
   )
 }
 
-const BitcoinTxnTableWithErrorBoundary = withErrorBoundary(BitcoinTxnTable, {
-  fallbackRender: (fallbackProps) => (<ErrorBoundaryFallback {...fallbackProps} title='Transaction table' />)
-});
-
-export default BitcoinTxnTableWithErrorBoundary;
-
-function reduceColumnFilters(columnFilters: ColumnFiltersState) {
-  return columnFilters.reduce((prev: any, cur: ColumnFilter & {value: any}) => {
-    switch(cur.id) {
-      case 'type':
-      prev['type'] = cur.value.toLowerCase();
-        break;
-      case 'time':
-      if(cur.value[0] !== undefined) {
-        prev['start'] = new Date(cur.value[0] * 1000).toISOString();
-      }
-
-        if(cur.value[1] !== undefined) {
-          prev['end'] = new Date(cur.value[1] * 1000).toISOString();
-        }
-        break;
-      case 'amount':
-      if(cur.value[0]) {
-        prev['amountMin'] = Number(cur.value[0]);
-      }
-
-        if(cur.value[1]) {
-          prev['amountMax'] = Number(cur.value[1]);
-        }
-        break;
-      case 'confirmations':
-      prev['status'] = cur.value.toLowerCase();
-        break;
-    }
-
-    return prev;
-  }, {} as any);
-
-
-}

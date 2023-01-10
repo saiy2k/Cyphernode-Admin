@@ -1,0 +1,212 @@
+import { Button, chakra, FormControl, FormErrorMessage, FormLabel, Input, InputGroup, Radio, RadioGroup, Stack, Text, useToast } from "@chakra-ui/react";
+import { postCallProxy } from "@shared/services/api";
+import { WatchAddressPayload, WatchXPubPayload } from "@shared/types";
+import { useState } from "react";
+import { useErrorHandler, withErrorBoundary } from "react-error-boundary";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { LoaderOverlay, Widget } from "..";
+import { ErrorBoundaryFallback } from "../ErrorBoundaryFallback";
+
+type Inputs = {
+  address: string,
+  label: string,
+  path: string,
+  nStart: string,
+  confirmedCallbackURL: string,
+  unconfirmedCallbackURL: string,
+};
+
+const WatchForm = () => {
+  const formVars = useForm<Inputs>();
+  const { register, handleSubmit, formState: { errors }, getValues, setValue, reset, control } = formVars;
+  const [ addressType, setAddressType ] = useState<string>("address");
+  const [ loading, setLoading ] = useState<boolean>(false);
+
+  const handleError = useErrorHandler();
+  const toast = useToast();
+
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    console.log('WatchForm :: onSubmit');
+
+    const commonPayload = {
+      confirmedCallbackURL: data.confirmedCallbackURL,
+      unconfirmedCallbackURL: data.unconfirmedCallbackURL,
+      label: data.label
+    };
+
+    let payload = null;
+
+    if(addressType === "address") {
+      payload = {
+        ...commonPayload,
+        address: data.address,
+      };
+    } else {
+      payload = {
+        ...commonPayload,
+        pub32: data.address,
+        ...( isNaN(Number(data.nStart)) ? {nStart: Number(data.nStart)}: {}),
+        path: data.path,
+      };
+    }
+
+    watch(payload);
+  }
+
+  const onError = (errors: any, e: any) => {
+    console.log('WatchForm :: onErorr');
+    console.log(errors, e);
+  }
+
+  const watch = async (payload: (WatchAddressPayload | WatchXPubPayload)) => {
+    const endpoint = addressType === 'address' ? 'watch': 'watchxpub';
+
+    setLoading(true);
+    try {
+      const serverResp = await postCallProxy(endpoint, payload);
+      console.log('serverResp', serverResp);
+      if (!serverResp.ok) {
+        let errorString = serverResp.status + ': ' + serverResp.statusText;
+        if (serverResp.body) {
+          const serverError = await serverResp.json();
+          errorString = errorString + ': ' + (serverError.message ? serverError.message : JSON.stringify(serverError));
+        }
+        throw new Error(errorString);
+      }
+      // const response = await serverResp.json();
+      reset();
+      toast({
+        title: 'Added a watch',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      })
+    } catch(err) {
+      handleError(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Widget variant='border' style={{position: 'relative'}} mb={2}>
+      <Text as='h3'>Add a watch</Text>
+      <chakra.form display='flex' flexDirection='column' gap='20px' mt={5} onSubmit={handleSubmit(onSubmit, onError)}>
+        <RadioGroup
+          onChange={setAddressType}
+          value={addressType}
+        >
+          <Stack spacing={4} direction='row'>
+            <Radio
+              _checked={{
+                // background: 'bg.light',
+                // color: 'main.light',
+                // borderWidth: '3px',
+                // borderColor: 'border.dark',
+
+                background: 'white',
+                  color: 'white',
+                  borderWidth: '3px',
+                  borderColor: 'black',
+              }}
+              value='address'
+            >
+              Address
+            </Radio>
+
+            <Radio
+              _checked={{
+                // background: 'bg.light',
+                // color: 'main.light',
+                // borderWidth: '3px',
+                // borderColor: 'border.dark',
+
+                background: 'white',
+                  color: 'white',
+                  borderWidth: '3px',
+                  borderColor: 'black',
+              }}
+              value='xpub'
+            >
+              *pub
+            </Radio>
+          </Stack>
+        </RadioGroup>
+
+        <FormControl isInvalid={errors.hasOwnProperty('address')}>
+          <FormLabel>Address / pub32</FormLabel>
+          <InputGroup flexDirection='column' gap='5px'>
+            <Input type='text' {...register('address', {required: true})} placeholder="Address / *pub" />
+            {
+              errors.address?.type === 'required'
+              ? <FormErrorMessage>Address is mandatory</FormErrorMessage>
+              : null
+            }
+          </InputGroup>
+        </FormControl>
+
+        <FormControl isInvalid={errors.hasOwnProperty('label')}>
+          <FormLabel>Label</FormLabel>
+          <InputGroup>
+            <Input type='text' {...register('label', {required: false})} />
+          </InputGroup>
+        </FormControl>
+
+        {
+          addressType !== 'xpub'
+          ? null
+          :
+          <Stack direction='row'>
+            <FormControl isInvalid={errors.hasOwnProperty('path')}>
+              <FormLabel>Path</FormLabel>
+              <InputGroup>
+                <Input type='text' {...register('path', {required: false})} placeholder="0/1/n" />
+              </InputGroup>
+            </FormControl>
+
+            <FormControl isInvalid={errors.hasOwnProperty('nStart')}>
+              <FormLabel>nStart</FormLabel>
+              <InputGroup>
+                <Input type='text' {...register('nStart', {required: false})} placeholder="109" />
+              </InputGroup>
+            </FormControl>
+          </Stack>
+        }
+
+        <FormControl isInvalid={errors.hasOwnProperty('confirmedCallbackURL')}>
+          <FormLabel>Confirmed URL</FormLabel>
+          <InputGroup flexDirection='column' gap='5px'>
+            <Input type='text' {...register('confirmedCallbackURL', {required: true})} placeholder="https://example.com/callback1conf" />
+            {
+              errors.confirmedCallbackURL?.type === 'required'
+              ? <FormErrorMessage>Confirmed URL is mandatory</FormErrorMessage>
+              : null
+            }
+          </InputGroup>
+        </FormControl>
+
+        <FormControl isInvalid={errors.hasOwnProperty('unconfirmedCallbackURL')}>
+          <FormLabel>Unconfirmed URL</FormLabel>
+          <InputGroup flexDirection='column' gap='5px'>
+            <Input type='text' {...register('unconfirmedCallbackURL', {required: true})} placeholder="https://example.com/callback0conf" />
+            {
+              errors.unconfirmedCallbackURL?.type === 'required'
+              ? <FormErrorMessage>Unconfirmed URL is mandatory</FormErrorMessage>
+              : null
+            }
+          </InputGroup>
+        </FormControl>
+
+        <Button type='submit' marginTop={{base: '20px', md: '10px'}} alignSelf={{base: 'center', md: 'end'}} w={{base: '50%', md: '20%'}}> Watch </Button>
+      </chakra.form>
+
+      {loading ? <LoaderOverlay> Spending... </LoaderOverlay>: null }
+    </Widget>
+  );
+};
+
+const WatchFormWithErrorBoundary = withErrorBoundary(WatchForm, {
+  fallbackRender: (fallbackProps) => (<ErrorBoundaryFallback {...fallbackProps} title='Add Watch' />)
+});
+
+export default WatchFormWithErrorBoundary;

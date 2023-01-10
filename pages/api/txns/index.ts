@@ -44,7 +44,7 @@ export default async function handler(
 
   try {
 
-    if (Math.random() > 0.9) {
+    if (Math.random() > 0.95) {
       const errorResp: ErrorResponse = {
         status: 500,
         name: 'Internal server error',

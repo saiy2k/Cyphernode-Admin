@@ -135,8 +135,12 @@ export { BuySellWidget } from './BuySellWidget';
 import BitcoinReceiveWidget from './bitcoin/ReceiveWidget';
 import BitcoinSendWidget from './bitcoin/SendWidget';
 import BitcoinTxnTable from './bitcoin/TxnTable';
+import BitcoinWatchTable from './bitcoin/WatchTable';
 
-export { BitcoinTxnTable, BitcoinSendWidget, BitcoinReceiveWidget };
+export { 
+  BitcoinTxnTable, BitcoinSendWidget, BitcoinReceiveWidget,
+  BitcoinWatchTable
+};
 
 export {
   type ButtonGroupProps,

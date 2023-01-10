@@ -8,10 +8,10 @@ export enum API_ID {
 }
 
 const apiIdAndKeyMap = {
-  [API_ID.ZERO]: "ce394562a83489f8a5c661c9f96049ecfb48604d921ec2347b687632e57ca52d",
-  [API_ID.ONE]: "52f73fbae602ba60c6a7337048868d28bb551b1276f4bd93eca2922bc34834c7",
-  [API_ID.TWO]: "4de4d12600d5ebb221b7ad4687f1af06ef25a5ae0c1501ef31dd7801160b6e3b",
-  [API_ID.THREE]: "8dc5d1dacd731be6c43844346da49aec1bfce6a8148bb094e4c77d7caff8ae2c",
+  [API_ID.ZERO]: "dcaf71599ba8472ffa5c184df6179804e4d7c72aacfa2b7919c8e1456c1c19a6",
+  [API_ID.ONE]: "34825918ea86edd1f17f4ac5175d026744ace02d55752890b7ff3f4ba2e0fb1b",
+  [API_ID.TWO]: "b5d1fa4eb323e9300132f4d699dd73fce9979c63d8d5bcad0fad1af72ecdbe22",
+  [API_ID.THREE]: "09ae6111d139bc09516a16bffb86f8061490f03c2e1997f97261327d9038ed95",
 };
 
 const urlAndApiId: any = {
@@ -19,6 +19,10 @@ const urlAndApiId: any = {
   getblockchaininfo: API_ID.ONE,
   getbalance: API_ID.TWO,
   getnewaddress: API_ID.TWO,
+  spend: API_ID.TWO,
+  getactivewatches: API_ID.ONE,
+  watch: API_ID.TWO,
+  watchxpub: API_ID.TWO,
 };
 
 export function generateKey(url: string) {
