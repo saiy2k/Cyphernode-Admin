@@ -19,18 +19,23 @@ import {
   getCoreRowModel,
   Table,
   useReactTable,
-  PaginationState,
-  ColumnFilter,
   SortingState,
 } from '@tanstack/react-table';
 import { RangeDatepicker } from 'chakra-dayzed-datepicker';
 
 import { Widget, Cell } from '@shared/components/index';
-import { CustomColumnDef, SuccessResponse } from '@shared/types';
+import { CustomColumnDef } from '@shared/types';
 import { dummyTxnDataForSkeleton } from '@shared/constants';
-//import { DebouncedInput } from 'shared/components/DebouncedInput';
 
 import { LoadingTable } from './bitcoin/TxnLoadingTable';
+
+export type FilterProps<T> = PropsWithChildren & {
+  column: Column<any, unknown>,
+  table: Table<T>,
+  selectedDates: Date[],
+  setSelectedDates: Function,
+  loading?: boolean
+};
 
 export type ServerDataTableProps<T> = PropsWithChildren & {
 
