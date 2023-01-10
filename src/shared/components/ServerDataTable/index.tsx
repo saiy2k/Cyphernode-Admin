@@ -17,6 +17,7 @@ import {
   Table,
   useReactTable,
   SortingState,
+  Row,
 } from '@tanstack/react-table';
 
 import { Widget, Cell } from '@shared/components/index';
@@ -33,30 +34,34 @@ export type FilterProps<T> = PropsWithChildren & {
   loading?: boolean
 };
 
+export type DetailProps<T> = PropsWithChildren & {
+  row: Row<T>
+}
+
+export type DetailCompProps<T> = (props: DetailProps<T>) => JSX.Element;
+export type FilterControlProps<T> = (props: FilterProps<T>) => JSX.Element;
+
 export type ServerDataTableProps<T> = PropsWithChildren & {
 
-  // TODO: Make the type such that it should have a 'row' property
-  DetailComp: any,
+  DetailComp: DetailCompProps<T>,
 
   data: Array<T>,
   dummyDataForSkeleton: Array<T>,
   columnDef: CustomColumnDef<T>[],
-  filter?: any
   paginationConfig?: any,
   isLoading: boolean,
   columnsToHideInMobile?: Array<string>,
   pageCount: number,
 
-  // FilterControl?: ((pros: FilterProps<T>) => React.ReactNode),
-  FilterControl?: any,
+  FilterControl?: FilterControlProps<T>,
   columnFilters: ColumnFiltersState
   pageIndex: number,
   pageSize: number,
   sorting: SortingState,
 
-  onColumnFiltersChange: any,
-  onPaginationChange: any,
-  onSortingChange: any,
+  onColumnFiltersChange: Function,
+  onPaginationChange: Function,
+  onSortingChange: Function,
 };
 
 export default function ServerDataTable<T>({

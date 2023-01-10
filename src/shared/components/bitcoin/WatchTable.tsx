@@ -2,12 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import {
   chakra,
-  Button,
   Flex,
-  Icon,
-  Input,
   Select,
-  useBreakpoint,
 } from '@chakra-ui/react';
 
 import {
@@ -18,7 +14,7 @@ import {
 } from '@tanstack/react-table';
 import { useErrorHandler, withErrorBoundary } from 'react-error-boundary';
 
-import { Watch } from '@shared/types';
+import { CustomColumnDef, Watch } from '@shared/types';
 import { getCallProxy } from '@shared/services/api';
 import { ErrorBoundaryFallback } from '../ErrorBoundaryFallback';
 
@@ -45,9 +41,6 @@ export const BitcoinWatchTable = () => {
     desc: true
   }])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
-  const [selectedRowIndex, setSelectedRowIndex] = useState<number>(-1);
-  const [selectedDates, setSelectedDates] = useState<Date[]>([new Date(), new Date()]);
 
   const handleError = useErrorHandler();
 
@@ -171,10 +164,10 @@ function Filter({
   selectedDates,
   setSelectedDates,
   loading
-}: FilterProps) {
+}: FilterProps<Watch>) {
   const columnFilterValue = column.getFilterValue()
 
-  const columnDef = (column.columnDef as CustomColumnDef<Txn>);
+  const columnDef = (column.columnDef as CustomColumnDef<Watch>);
 
   const disabled = loading;
 
