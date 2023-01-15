@@ -76,7 +76,6 @@ const WatchForm = (
       if (!serverResp.ok) {
         let errorString = serverResp.status + ': ' + serverResp.statusText;
         if (serverResp.body) {
-          console.log('serverRes.body: ', serverResp.body);
           const serverError = await serverResp.json();
           errorString = errorString + ': ' + (serverError.message ? serverError.message : JSON.stringify(serverError));
         }

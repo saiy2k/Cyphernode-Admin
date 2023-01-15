@@ -18,6 +18,8 @@ import {
   useReactTable,
   SortingState,
   Row,
+  OnChangeFn,
+  PaginationState,
 } from '@tanstack/react-table';
 
 import { Widget, Cell } from '@shared/components/index';
@@ -59,9 +61,9 @@ export type ServerDataTableProps<T> = PropsWithChildren & {
   pageSize: number,
   sorting: SortingState,
 
-  onColumnFiltersChange: Function,
-  onPaginationChange: Function,
-  onSortingChange: Function,
+  onColumnFiltersChange: OnChangeFn<ColumnFiltersState>,
+  onPaginationChange: OnChangeFn<PaginationState>,
+  onSortingChange: OnChangeFn<SortingState>,
 };
 
 export default function ServerDataTable<T>({

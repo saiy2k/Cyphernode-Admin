@@ -135,7 +135,7 @@ export { BuySellWidget } from './BuySellWidget';
 import BitcoinReceiveWidget from './bitcoin/ReceiveWidget';
 import BitcoinSendWidget from './bitcoin/SendWidget';
 import BitcoinTxnTable from './bitcoin/TxnTable';
-import BitcoinWatchTable from './bitcoin/WatchTable';
+import BitcoinWatchTable from './bitcoin/WatchClientTable';
 
 export { 
   BitcoinTxnTable, BitcoinSendWidget, BitcoinReceiveWidget,

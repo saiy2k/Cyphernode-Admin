@@ -8,10 +8,10 @@ export enum API_ID {
 }
 
 const apiIdAndKeyMap = {
-  [API_ID.ZERO]: "dcaf71599ba8472ffa5c184df6179804e4d7c72aacfa2b7919c8e1456c1c19a6",
-  [API_ID.ONE]: "34825918ea86edd1f17f4ac5175d026744ace02d55752890b7ff3f4ba2e0fb1b",
-  [API_ID.TWO]: "b5d1fa4eb323e9300132f4d699dd73fce9979c63d8d5bcad0fad1af72ecdbe22",
-  [API_ID.THREE]: "09ae6111d139bc09516a16bffb86f8061490f03c2e1997f97261327d9038ed95",
+  [API_ID.ZERO]: "5b749a7f05309089519f289f16cbc22ae62e3f7f942509317380a336ead55271",
+  [API_ID.ONE]: "17635a64ed4a82a1d69da9374d3b3b1886e976744187603c9d07c770d9307044",
+  [API_ID.TWO]: "51a63a736a75b70eb279c8633c33d520de87ce81f2140f837ebddae53acb8065",
+  [API_ID.THREE]: "4991548e221f7512922df3f63d3ed9857e4e838112de3fe0a66d00c3d06ec519",
 };
 
 const urlAndApiId: any = {
@@ -21,8 +21,11 @@ const urlAndApiId: any = {
   getnewaddress: API_ID.TWO,
   spend: API_ID.TWO,
   getactivewatches: API_ID.ONE,
-  watch: API_ID.TWO,
+  getactivexpubwatches: API_ID.ONE,
+  watch: API_ID.ONE,
   watchxpub: API_ID.TWO,
+  unwatch: API_ID.ONE,
+  unwatchxpubbyxpub: API_ID.ONE,
 };
 
 export function generateKey(url: string) {

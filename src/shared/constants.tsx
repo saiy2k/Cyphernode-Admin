@@ -1,6 +1,6 @@
 import { AddressType, AmountType, ConfTarget } from "./types";
 
-export const baseURL: string = 'https://192.168.1.4:2009/v0';
+export const baseURL: string = 'https://167.71.233.31:2009/v0';
 
 
 export const CONF_TARGET: ConfTarget[] = [

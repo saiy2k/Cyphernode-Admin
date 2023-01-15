@@ -98,22 +98,26 @@ export const BitcoinWatchTable = () => {
   }];
 
   return (
-    <ServerDataTable
-      data={watchData} 
-      isLoading={false}
-      columnDef={columns}
+    // <ServerDataTable
+    //   data={watchData} 
+    //   isLoading={false}
+    //   columnDef={columns}
 
-      columnFilters={columnFilters}
-      pageIndex={pageIndex}
-      pageSize={pageSize}
-      sorting={sorting}
+    //   columnFilters={columnFilters}
+    //   pageIndex={pageIndex}
+    //   pageSize={pageSize}
+    //   sorting={sorting}
 
-      onColumnFiltersChange={setColumnFilters}
-      onPaginationChange={setPagination}
-      onSortingChange={setSorting}
+    //   onColumnFiltersChange={setColumnFilters}
+    //   onPaginationChange={setPagination}
+    //   onSortingChange={setSorting}
 
-      DetailComp={WatchDetail}
-    />
+    //   dummyDataForSkeleton={[]}
+    //   pageCount={0}
+
+    //   DetailComp={WatchDetail}
+    // />
+    <h1>TODO: Fix DetailComp prop</h1>
   )
 }
 

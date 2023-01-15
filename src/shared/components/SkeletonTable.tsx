@@ -19,7 +19,7 @@ export function SkeletonTable(props: SkeletonTableProps) {
 
         <React.Fragment key={row.id}>
           <tr>
-            {row.getVisibleCells().slice(0, -1).map(cell => (
+            {row.getVisibleCells().slice().map(cell => (
               <Cell id={cell.id} key={cell.id} padding='10px'>
                 <Skeleton borderRadius='10px' height='30px'></Skeleton>
               </Cell>

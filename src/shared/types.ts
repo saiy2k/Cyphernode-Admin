@@ -34,6 +34,9 @@ export type Watch = {
   confirmedCallbackURL: string;
   label: string;
   watching_since: string;
+  pub32?: string;
+  derivation_path?: string;
+  last_imported_n?: number;
 };
 
 export type BlockInfo = {
@@ -57,6 +60,17 @@ export interface ConfTarget extends ButtonGroupOptions { };
 export interface AmountType extends ButtonGroupOptions { };
 
 export interface AddressType  extends ButtonGroupOptions { };
+
+export type FilterType = {
+  id: any,
+  text: string,
+}
+
+export type ClientCustomColumnDef<T> = ColumnDef<T> & {
+  fieldType: ("text" | "number" | "select" | "date"),
+  options?: FilterType[],
+  width: string,
+}
 
 export type CustomColumnDef<T> = ColumnDef<T> & { fieldType?: string, options?: any[], width: string }
 
