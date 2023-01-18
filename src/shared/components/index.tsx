@@ -136,10 +136,12 @@ import BitcoinReceiveWidget from './bitcoin/ReceiveWidget';
 import BitcoinSendWidget from './bitcoin/SendWidget';
 import BitcoinTxnTable from './bitcoin/TxnTable';
 import BitcoinWatchTable from './bitcoin/WatchClientTable';
+import BitcoinBatchTable from './bitcoin/BatchTable';
 
 export { 
   BitcoinTxnTable, BitcoinSendWidget, BitcoinReceiveWidget,
-  BitcoinWatchTable
+  BitcoinWatchTable,
+  BitcoinBatchTable,
 };
 
 export {

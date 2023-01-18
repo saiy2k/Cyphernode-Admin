@@ -39,6 +39,15 @@ export type Watch = {
   last_imported_n?: number;
 };
 
+export type Batch = {
+  batcherId: number;
+  batcherLabel: string;
+  confTarget: number;
+  nbOutputs: number;
+  oldest: string;
+  total: number;
+};
+
 export type BlockInfo = {
   chain: string;
   blocks: number;

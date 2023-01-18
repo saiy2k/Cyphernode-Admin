@@ -1,4 +1,4 @@
-import { Button, chakra, FormControl, FormErrorMessage, FormLabel, Input, InputGroup, Radio, RadioGroup, Stack, Text, useToast } from "@chakra-ui/react";
+import { Button, chakra, FormControl, FormErrorMessage, FormHelperText, FormLabel, Input, InputGroup, Radio, RadioGroup, Stack, Text, useToast } from "@chakra-ui/react";
 import { postCallProxy } from "@shared/services/api";
 import { WatchAddressPayload, WatchXPubPayload } from "@shared/types";
 import { useState } from "react";
@@ -6,6 +6,7 @@ import { useErrorHandler, withErrorBoundary } from "react-error-boundary";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { LoaderOverlay, Widget } from "..";
 import { ErrorBoundaryFallback } from "../ErrorBoundaryFallback";
+import { validate, getAddressInfo } from 'bitcoin-address-validation';
 
 type Inputs = {
   address: string,
@@ -29,6 +30,7 @@ const WatchForm = (
   const { register, handleSubmit, formState: { errors }, getValues, setValue, reset, control } = formVars;
   const [ addressType, setAddressType ] = useState<string>("address");
   const [ loading, setLoading ] = useState<boolean>(false);
+  const [ addressInfo, setAddressInfo ] = useState<any>(null);
 
   const handleError = useErrorHandler();
   const toast = useToast();
@@ -64,6 +66,12 @@ const WatchForm = (
   const onError = (errors: any, e: any) => {
     console.log('WatchForm :: onErorr');
     console.log(errors, e);
+  }
+
+  const validateXpub = (xpub: string) => {
+    // Regex from https://bitcoin.stackexchange.com/a/111598/133323
+    const regex = /^([xyYzZtuUvV]pub[1-9A-HJ-NP-Za-km-z]{79,108})$/;
+    return regex.test(xpub)
   }
 
   const watch = async (payload: (WatchAddressPayload | WatchXPubPayload)) => {
@@ -146,7 +154,31 @@ const WatchForm = (
         <FormControl isInvalid={errors.hasOwnProperty('address')}>
           <FormLabel>Address / pub32</FormLabel>
           <InputGroup flexDirection='column' gap='5px'>
-            <Input type='text' {...register('address', {required: true})} placeholder="Address / *pub" />
+            <Input type='text' {...register('address', { required: true, validate: (val:string) => {
+              console.log('validate address... ');
+              if(addressType === 'xpub') {
+                const isValid = validateXpub(val)
+                setAddressInfo('');
+                return isValid;
+              } else {
+                const isValid = validate(val);
+                if (isValid) {
+                  setAddressInfo(getAddressInfo(val));
+                }
+                return isValid;
+              }
+
+            }})} placeholder="Address / *pub" />
+
+            { !errors.hasOwnProperty('address') && addressInfo && addressInfo.type ? 
+            <FormHelperText> { addressInfo.type } - { addressInfo.network } </FormHelperText>: null }
+
+            {
+              errors.address?.type === 'validate'
+              ? <FormErrorMessage>Invalid address</FormErrorMessage>
+              : null
+            }
+
             {
               errors.address?.type === 'required'
               ? <FormErrorMessage>Address is mandatory</FormErrorMessage>
@@ -157,8 +189,22 @@ const WatchForm = (
 
         <FormControl isInvalid={errors.hasOwnProperty('label')}>
           <FormLabel>Label</FormLabel>
-          <InputGroup>
-            <Input type='text' {...register('label', {required: false})} />
+          <InputGroup flexDirection='column' gap='5px'>
+            <Input type='text' {...register('label', {required: true, minLength: 3})} />
+
+            <div>
+              {
+                errors.label?.type === 'required'
+                ? <FormErrorMessage>Label is mandatory</FormErrorMessage>
+                : null
+              }
+
+              {
+                errors.label?.type === 'minLength'
+                ? <FormErrorMessage>Label should contain at least 3 characters</FormErrorMessage>
+                : null
+              }
+            </div>
           </InputGroup>
         </FormControl>
 
@@ -169,15 +215,37 @@ const WatchForm = (
           <Stack direction='row'>
             <FormControl isInvalid={errors.hasOwnProperty('path')}>
               <FormLabel>Path</FormLabel>
-              <InputGroup>
-                <Input type='text' {...register('path', {required: false})} placeholder="0/1/n" />
+              <InputGroup flexDirection='column' gap='5px'>
+                <Input type='text' {...register('path', {required: true, pattern: {value: /(\d\/)*(\d\/[\dn])$/, message: 'Invalid path'}})} placeholder="0/1/n" />
+
+                {
+                  errors.path?.type === 'required'
+                  ? <FormErrorMessage>Path is mandatory</FormErrorMessage>
+                  : null
+                }
+
+                {
+                  errors.path?.message
+                  ? <FormErrorMessage>{errors.path?.message}</FormErrorMessage>
+                  : null
+                }
               </InputGroup>
             </FormControl>
 
             <FormControl isInvalid={errors.hasOwnProperty('nstart')}>
               <FormLabel>nStart</FormLabel>
-              <InputGroup>
-                <Input type='text' {...register('nstart', {required: false})} placeholder="109" />
+              <InputGroup flexDirection='column' gap='5px'>
+                <Input type='text' {...register('nstart', {required: true, pattern: { value: /^[0-9]*\.?[0-9]*$/, message: 'Should be a number'}})} placeholder="109" />
+                {
+                  errors.nstart?.type === 'required'
+                  ? <FormErrorMessage>nStart is mandatory</FormErrorMessage>
+                  : null
+                }
+                {
+                  errors.nstart?.message
+                  ? <FormErrorMessage>{errors.nstart?.message}</FormErrorMessage>
+                  : null
+                }
               </InputGroup>
             </FormControl>
           </Stack>
@@ -186,10 +254,15 @@ const WatchForm = (
         <FormControl isInvalid={errors.hasOwnProperty('confirmedCallbackURL')}>
           <FormLabel>Confirmed URL</FormLabel>
           <InputGroup flexDirection='column' gap='5px'>
-            <Input type='text' {...register('confirmedCallbackURL', {required: true})} placeholder="https://example.com/callback1conf" />
+            <Input type='text' {...register('confirmedCallbackURL', {required: true, pattern: {value: /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/, message: 'Should be a valid URL'}})} placeholder="https://example.com/callback1conf" />
             {
               errors.confirmedCallbackURL?.type === 'required'
               ? <FormErrorMessage>Confirmed URL is mandatory</FormErrorMessage>
+              : null
+            }
+            {
+              errors.confirmedCallbackURL?.message
+              ? <FormErrorMessage>{errors.confirmedCallbackURL?.message}</FormErrorMessage>
               : null
             }
           </InputGroup>
@@ -198,10 +271,15 @@ const WatchForm = (
         <FormControl isInvalid={errors.hasOwnProperty('unconfirmedCallbackURL')}>
           <FormLabel>Unconfirmed URL</FormLabel>
           <InputGroup flexDirection='column' gap='5px'>
-            <Input type='text' {...register('unconfirmedCallbackURL', {required: true})} placeholder="https://example.com/callback0conf" />
+            <Input type='text' {...register('unconfirmedCallbackURL', {required: true, pattern: {value: /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/, message: 'Should be a valid URL'}})} placeholder="https://example.com/callback0conf" />
             {
               errors.unconfirmedCallbackURL?.type === 'required'
               ? <FormErrorMessage>Unconfirmed URL is mandatory</FormErrorMessage>
+              : null
+            }
+            {
+              errors.unconfirmedCallbackURL?.message
+              ? <FormErrorMessage>{errors.unconfirmedCallbackURL?.message}</FormErrorMessage>
               : null
             }
           </InputGroup>

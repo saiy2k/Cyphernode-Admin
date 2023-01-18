@@ -209,7 +209,7 @@ export default function ServerDataTable<T>({
           :
             <tbody>
 
-            {table.getCoreRowModel().rows.length === 0 ? <tr> <chakra.th colSpan={5} textAlign="center" pt={12} pb={8}>
+            {table.getRowModel().rows.length === 0 ? <tr> <chakra.th colSpan={5} textAlign="center" pt={12} pb={8}>
               <h2> Empty results </h2> 
               <h6> Refine your filters </h6> 
             </chakra.th> </tr> : null }

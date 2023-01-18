@@ -1,15 +1,12 @@
+import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { Box, chakra, Flex, Icon, Select, useBreakpoint } from "@chakra-ui/react";
-import { ClientCustomColumnDef, CustomColumnDef } from "@shared/types";
 import { Column, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, Row, SortingState, Table, useReactTable } from "@tanstack/react-table";
-import { RangeDatepicker } from "chakra-dayzed-datepicker";
-import dayjs from "dayjs";
-import React, { useEffect } from "react";
-import { PropsWithChildren, useMemo, useState } from "react"
-import { IoChevronUpCircle, IoChevronDownCircle, IoChevronDownCircleOutline, IoCloseCircleOutline } from "react-icons/io5";
+import { IoChevronUpCircle, IoChevronDownCircle, IoChevronDownCircleOutline } from "react-icons/io5";
 import { MdExpandLess, MdExpandMore } from "react-icons/md";
-import { Cell, Widget } from "..";
-import { DebouncedInput } from "../DebouncedInput";
-import { SkeletonTable } from "../SkeletonTable";
+import { Cell, Widget } from "@shared/components/index";
+import { ClientCustomColumnDef, CustomColumnDef } from "@shared/types";
+
+import { SkeletonTable } from "@shared/components/SkeletonTable";
 import ClientDataTableFilter from "./Filter";
 import Paginator from "./Paginator";
 
@@ -28,6 +25,8 @@ export type ClientDataTableProps<T> = PropsWithChildren & {
   columnsToHideInMobile?: Array<string>,
 };
 
+const emptyArray: any = [];
+
 export default function ClientDataTable<T>({
   data,
   columnDef,
@@ -39,10 +38,9 @@ export default function ClientDataTable<T>({
 
   const breakpoint = useBreakpoint({ssr: false});
 
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>(emptyArray);
   const [selectedRowIndex, setSelectedRowIndex] = useState<number>(-1);
-
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(emptyArray);
 
   const columns = useMemo<CustomColumnDef<T>[]>(() => [
     ...columnDef,
@@ -56,7 +54,18 @@ export default function ClientDataTable<T>({
     });
   }
 
+    /*
   useEffect(() => {
+    console.log(sorting);
+    console.log(selectedRowIndex);
+    console.log(columnFilters);
+  }, [sorting, selectedRowIndex, columnFilters]);
+     */
+
+  useEffect(() => {
+
+    console.log('useEffect :: breakpoint');
+
     if (columnsToHideInMobile.length === 0) return;
 
     if(['base', 'sm', 'md'].includes(breakpoint)) {
@@ -74,12 +83,13 @@ export default function ClientDataTable<T>({
     }
   }, [breakpoint]);
 
-  const emptyValues = columns.reduce((prev, cur ) => {
+  const emptyValues = useMemo(() => columns.reduce((prev, cur ) => {
+    console.log('reduce emptyValues');
     prev[cur.id!] = '';
     return prev;
-  }, {} as any);
+  }, {} as any), [columns]);
 
-  const dummyDataForSkeleton = new Array(10).fill(emptyValues);
+  const dummyDataForSkeleton = useMemo(() => new Array(10).fill(emptyValues), [emptyValues]);
 
   const table = useReactTable({
     data: isLoading ? dummyDataForSkeleton: data,
@@ -172,6 +182,11 @@ export default function ClientDataTable<T>({
           :
           <tbody>
 
+            {table.getRowModel().rows.length === 0 ? <tr> <chakra.th colSpan={5} textAlign="center" pt={12} pb={8}>
+              <h2> Empty results </h2> 
+              <h6> Refine your filters </h6> 
+            </chakra.th> </tr> : null }
+
             {table
               .getRowModel()
               .rows
@@ -201,7 +216,7 @@ export default function ClientDataTable<T>({
 
       </table>
 
-      <Paginator table={table} />
+      { useMemo(() => <Paginator table={table} />, [table]) }
 
     </Widget>
   );

@@ -105,6 +105,7 @@ export const BitcoinWatchTable = ({
 
     setIsUpdating(true);
     try {
+
       const serverResp = await postCallProxy(endpoint, payload);
       console.log("serverResp", serverResp);
       if (!serverResp.ok) {
@@ -120,6 +121,34 @@ export const BitcoinWatchTable = ({
         }
         throw new Error(errorString);
       }
+
+      const endpoint2 = type === "address" ? "unwatch" : "unwatchxpubbyxpub";
+
+      /*
+      let serverResp2;
+      if (type === 'address') {
+        serverResp2 = await postCallProxy(endpoint2, {
+          id: payload.id
+        });
+      } else {
+        serverResp2 = await getCallProxy(endpoint + '/' + payload.pub32);
+      }
+      console.log("serverResp2", serverResp2);
+      if (!serverResp2.ok) {
+        let errorString = serverResp2.status + ": " + serverResp2.statusText;
+        if (serverResp2.body) {
+          const serverError = await serverResp2.json();
+          errorString =
+            errorString +
+            ": " +
+            (serverError.message
+              ? serverError.message
+              : JSON.stringify(serverError));
+        }
+        throw new Error(errorString);
+      }
+      */
+
       // const response = await serverResp.json();
       toast({
         title: "Updated the watch",

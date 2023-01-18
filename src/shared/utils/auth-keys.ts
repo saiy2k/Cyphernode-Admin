@@ -20,12 +20,17 @@ const urlAndApiId: any = {
   getbalance: API_ID.TWO,
   getnewaddress: API_ID.TWO,
   spend: API_ID.TWO,
+
   getactivewatches: API_ID.ONE,
   getactivexpubwatches: API_ID.ONE,
   watch: API_ID.ONE,
   watchxpub: API_ID.TWO,
   unwatch: API_ID.ONE,
   unwatchxpubbyxpub: API_ID.ONE,
+
+  listbatchers: API_ID.TWO,
+  createbatcher: API_ID.TWO,
+  updatebatcher: API_ID.TWO,
 };
 
 export function generateKey(url: string) {

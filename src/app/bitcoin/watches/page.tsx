@@ -13,9 +13,11 @@ import { useErrorHandler } from 'react-error-boundary';
 import { Watch, WatchAddressPayload, WatchXPubPayload } from '@shared/types';
 import { getCallProxy, postCallProxy } from '@shared/services/api';
 const emptyArray: Watch[] = [];
+
 export default function Watches() {
 
   console.log('Render: Bitcoin watches page');
+
   const [showWatchForm, setShowWatchForm] = useState<boolean>(false);
 
   const [ watchAddressData, setWatchAddressData ] = useState<Watch[]>(emptyArray);
