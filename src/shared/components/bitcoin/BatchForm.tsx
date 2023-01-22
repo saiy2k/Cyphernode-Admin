@@ -106,7 +106,7 @@ const BatchForm = (
             <Input type='text' {...register('confTarget', {required: true, pattern: { value: /^[0-9]*\.?[0-9]*$/, message: 'Should be a number'}})} placeholder="32" />
             {
               errors.confTarget?.type === 'required'
-              ? <FormErrorMessage>Confirmed URL is mandatory</FormErrorMessage>
+              ? <FormErrorMessage>Confirmation target is mandatory</FormErrorMessage>
               : null
             }
             {

@@ -72,20 +72,6 @@ export const BitcoinBatchTable = ({
     width: 'auto',
     fieldType: 'number',
   }, {
-    id: 'status',
-    accessorKey: 'status',
-    header: () => <span> Status </span>,
-    cell: (info: any) => info.getValue(),
-    width: 'auto',
-    fieldType: 'select',
-    options: [{
-      id: 'active',
-      text: 'Active'
-    },{
-      id: 'executed',
-      text: 'Executed'
-    }]
-  }, {
     id: 'nbOutputs',
     accessorKey: 'nbOutputs',
     header: () => <span> Txn Count </span>,
@@ -145,7 +131,7 @@ export const BitcoinBatchTable = ({
       data={data}
       columnDef={columns}
       isLoading={isLoading}
-      columnsToHideInMobile={["confTarget", "nbOutputs", "total"]}
+      columnsToHideInMobile={["confTarget"]}
       detailComp={(props) => (
         <BatchDetail
           {...props}

@@ -106,13 +106,13 @@ export const BatchDetail = ({
         {
           onEdit
           ? editMode
-            ? <Button width={{base: '45%', sm: 120}} h={12} onClick={() => saveChanges() }> Save Changes </Button>
-            : <Button width={{base: '45%', sm: 120}} h={12} onClick={() => setEditMode(true) }> Edit </Button>
+            ? <Button width={{base: 'auto', sm: 120}} h={12} onClick={() => saveChanges() }> Save Changes </Button>
+            : <Button width={{base: 'auto', sm: 120}} h={12} onClick={() => setEditMode(true) }> Edit </Button>
           : null
         }
 
         <NLink href={`/bitcoin/batches/${row.original.batcherId}`}>
-          <Button width={{base: '45%', sm: 120}} h={12}> Full detail </Button>
+          <Button width={{base: 'auto', sm: 120}} h={12}> Full detail </Button>
         </NLink>
       </Flex>
       {isUpdating ? <LoaderOverlay> Updating... </LoaderOverlay>: null }

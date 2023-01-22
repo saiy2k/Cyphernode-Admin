@@ -39,3 +39,4 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
  * Watch page - Edit issue - To discuss with Etienne
  * ClientDataTable - Render optimize
  * Batches -
+ * API requests - AbortController - For cleanup

@@ -46,6 +46,18 @@ export type Batch = {
   nbOutputs: number;
   oldest: string;
   total: number;
+  txid?: string;
+  hash?: string;
+  outputs?: BatchTxn[];
+};
+
+
+export type BatchTxn = {
+  outputId: number;
+  outputLabel: string;
+  address: string;
+  amount: number;
+  addedTimestamp: string;
 };
 
 export type BlockInfo = {
@@ -116,3 +128,10 @@ export type WatchXPubPayload = {
   path?: string,
   nStart?: number,
 } & WatchPayload;
+
+export type AddToBatchPayload = {
+  address: string,
+  amount: number,
+  batcherId: number,
+  webhookUrl: string,
+};

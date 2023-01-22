@@ -31,6 +31,10 @@ const urlAndApiId: any = {
   listbatchers: API_ID.TWO,
   createbatcher: API_ID.TWO,
   updatebatcher: API_ID.TWO,
+  getbatchdetails: API_ID.TWO,
+  addtobatch: API_ID.TWO,
+  removefrombatch: API_ID.TWO,
+  batchspend: API_ID.TWO,
 };
 
 export function generateKey(url: string) {
