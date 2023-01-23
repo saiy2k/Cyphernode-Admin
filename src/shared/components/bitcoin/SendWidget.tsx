@@ -94,7 +94,7 @@ const BitcoinSendWidget = () => {
     console.log(data);
     const payload: SpendCoinPayload = {
       address: data.address,
-      amount: amountInSats ? parseFloat(data.amount) * 100000000 : parseInt(data.amount),
+      amount: amountInSats ? parseFloat(data.amount) * 100000000 : parseFloat(data.amount),
       confTarget: data.target
     };
 
@@ -207,7 +207,7 @@ const BitcoinSendWidget = () => {
                 name='target-type'
                 defaultValue='auto-fastest'
                 value={confTarget}
-                onChange={(value: string) => { console.log('confTarget: ', value); setConfTarget(value); setValue('target', parseInt(value)); }}
+                onChange={(value: string) => { setConfTarget(value); setValue('target', parseInt(value)); }}
                 options={CONF_TARGET}
                 key='target-type'
                 justifyContent='flex-end'

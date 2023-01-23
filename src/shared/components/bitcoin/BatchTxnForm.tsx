@@ -119,7 +119,7 @@ const BatchTxnForm = ({
       webhookUrl: data.webhookUrl,
     };
 
-    addToBatch(payload);
+    addToBatch(payload).catch(err => handleError(err));
   };
 
   const addToBatch = async (payload: AddToBatchPayload) => {
@@ -127,7 +127,6 @@ const BatchTxnForm = ({
     try {
       const serverResp = await postCallProxy('addtobatch', payload);
       if (!serverResp.ok) {
-        // debugger;
         let errorString = serverResp.status + ': ' + serverResp.statusText;
         if (serverResp.body) {
           const serverError = await serverResp.json();
@@ -147,12 +146,12 @@ const BatchTxnForm = ({
           duration: 3000,
           isClosable: true,
         })
+        onAddToBatch();
       }
     } catch (err: unknown) {
       handleError(err);
     } finally {
       setLoading(false);
-      onAddToBatch();
     }
   }
 

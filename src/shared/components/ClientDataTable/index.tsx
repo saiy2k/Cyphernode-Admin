@@ -64,8 +64,6 @@ export default function ClientDataTable<T>({
 
   useEffect(() => {
 
-    console.log('useEffect :: breakpoint');
-
     if (columnsToHideInMobile.length === 0) return;
 
     if(['base', 'sm', 'md'].includes(breakpoint)) {
@@ -84,7 +82,6 @@ export default function ClientDataTable<T>({
   }, [breakpoint]);
 
   const emptyValues = useMemo(() => columns.reduce((prev, cur ) => {
-    console.log('reduce emptyValues');
     prev[cur.id!] = '';
     return prev;
   }, {} as any), [columns]);
@@ -216,7 +213,7 @@ export default function ClientDataTable<T>({
 
       </table>
 
-      { useMemo(() => <Paginator table={table} />, [table]) }
+      { useMemo(() => <Paginator table={table} />, [table.getState().pagination.pageIndex, table.getState().pagination.pageSize]) }
 
     </Widget>
   );

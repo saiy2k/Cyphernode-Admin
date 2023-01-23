@@ -15,7 +15,7 @@ type QStatusEnum = typeof QStatus[number];
 type QSortColumnEnum = typeof QSortColumn[number];
 type QSortDirectionEnum = typeof QSortDirection[number];
 
-type RequestQuery = {
+export type RequestQuery = {
   type?: QTypeEnum;
   start?: string; // ISO Datetime string; Tested upto seconds precision, but not ms
   end?: string; // ISO Datetime string; Tested upto seconds precision, but not ms
@@ -30,7 +30,7 @@ type RequestQuery = {
   page: number;
 }
 
-type TxnResponse = SuccessResponse & {
+export type TxnResponse = SuccessResponse & {
   data: Txn[]
 }
 
@@ -64,10 +64,10 @@ export default async function handler(
       return;
     }
     const query: RequestQuery = validateResponse as RequestQuery;
-    console.log('request query', query);
+    // console.log('request query', query);
 
     const allTxns = await getCallA('get_txns_spending/1000');
-    console.log(allTxns.data.length);
+    // console.log(allTxns.data.txns.length);
     let filteredTxns: Txn[] = [...allTxns.data.txns];
 
     // TODO: Combine these into single filter()
@@ -138,7 +138,7 @@ export default async function handler(
  * TODO: On duplicate query params, error message is misleading.
  * TODO: Simplify ajv error messages in general
  */
-function parseQueryParams(
+export function parseQueryParams(
   req: NextApiRequest,
   res: NextApiResponse<TxnResponse | ErrorResponse>
 ): RequestQuery | boolean {

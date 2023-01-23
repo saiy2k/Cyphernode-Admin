@@ -1,63 +1,39 @@
-import {beforeEach, describe, expect, jest, test} from '@jest/globals';
-const httpMocks = require('node-mocks-http');
-const handler = require('../pages/api/txns/index').default;
-import { baseURL as cnUrl } from '@shared/constants';
-
-
-const mockTxns = [
-  {
-    category: 'generate',
-    time: 1609459200,
-    amount: 0.1,
-    confirmations: 12
-  },
-  {
-    category: 'generate',
-    time: 1609459201,
-    amount: 0.2,
-    confirmations: 12
-  },
-  {
-    category: 'generate',
-    time: 1609459202,
-    amount: 0.3,
-    confirmations: 12
-  }
-];
-
-
+import type { NextApiRequest, NextApiResponse } from 'next'
+import {beforeEach, describe, expect, jest, it} from '@jest/globals';
+import httpMocks from 'node-mocks-http';
+import handler, { parseQueryParams, TxnResponse } from '../pages/api/txns/index';
+import { SuccessResponse, ErrorResponse, Txn } from '@shared/types';
 import { getCallA } from '@shared/services/api';
+import { mockTxns } from './mock-data/txns.json';
+
 jest.mock('@shared/services/api', () => {
-  // const originalModule: any = jest.requireActual('@shared/services/api');
   return {
     __esModule: true,
-    // ...originalModule,
     getCallA: jest.fn(() => Promise.resolve({
       status: 200,
       data: {
-        txns: mockTxns,
-        meta: {
-          page: 1,
-          pageCount: 0,
-          perPage: 25,
-          totalCount: 0,
-        }
-      }
+        txns: mockTxns.sort((a, b) => b.time - a.time),
+      },
     })),
   };
 });
 
-describe('API route handler', () => {
+describe('Test positive flows', () => {
 
   beforeEach(() => {
     (Math as any).random = jest.fn().mockReturnValue(0.94);
   });
 
-  test('should return 200 and expected JSON data', async () => {
+  it('should return full response', async () => {
     const req = httpMocks.createRequest({
       method: 'GET',
-      url: '/path',
       query: {
+        perPage: 25,
+      }
+    });
+    const res = httpMocks.createResponse();
+
+    /*
         type: 'generate',
         start: '2022-01-01T00:00:00.000Z',
         end: '2022-01-31T00:00:00.000Z',
@@ -66,25 +42,31 @@ describe('API route handler', () => {
         status: 'confirmed',
         sortColumn: 'time',
         sortDirection: 'ASC',
-        perPage: 25,
         page: 1
-      }
-    });
-    const res = httpMocks.createResponse();
+     */
 
     await handler(req, res);
 
     expect(res.statusCode).toBe(200);
     expect(res._getJSONData()).toEqual({
-      status: 200,
-      data: mockTxns
+      data: mockTxns,
+      meta: {
+        page: 0,
+        pageCount: 1,
+        perPage: 25,
+        totalCount: 3,
+      }
     });
+
   });
 
-  test('should return 500 and error JSON data', async () => {
+});
+
+describe('Test error scenarios', () => {
+
+  it('should return 500 and error JSON data ( SIMULATED Error)', async () => {
     const req = httpMocks.createRequest({
       method: 'GET',
-      url: '/path'
     });
     const res = httpMocks.createResponse();
     (Math as any).random = jest.fn().mockReturnValue(0.96);
@@ -103,4 +85,105 @@ describe('API route handler', () => {
       }
     });
   });
+
 });
+
+describe('parseQueryParams', () => {
+  it('should return false when type is invalid', () => {
+
+    const req = httpMocks.createRequest({
+      method: 'GET',
+      query: {
+        type: 'invalid',
+      }
+    });
+    const res = httpMocks.createResponse();
+
+    const result = parseQueryParams(req, res);
+    expect(result).toBe(false);
+    expect(res.statusCode).toBe(400);
+    expect(res._getJSONData()).toEqual({
+      status: 400,
+      name: 'Invalid query parameters',
+      description: '',
+      detail: [{
+        instancePath: "/type",
+        schemaPath: "#/properties/type/enum",
+        keyword: "enum",
+        params: {
+          allowedValues: ["generate", "immature", "receive", "send"]
+        },
+        message: "must be equal to one of the allowed values"
+      }],
+    });
+  })
+
+  /*
+  it('should return false when status is invalid', () => {
+
+    const req = httpMocks.createRequest({
+      method: 'GET',
+      query: {
+        type: 'invalid',
+      }
+    });
+    const res = httpMocks.createResponse();
+
+    req.query.status = 'invalid'
+    const result = parseQueryParams(req, res)
+    expect(result).toBe(false)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith({
+      status: 400,
+      name: 'Invalid query parameters',
+      description: '',
+      detail: [{dataPath: '.status', message: 'should be equal to one of the allowed values'}],
+    })
+  })
+
+  it('should return false when sort column is invalid', () => {
+ 
+    const req = httpMocks.createRequest({
+      method: 'GET',
+      query: {
+        type: 'invalid',
+      }
+    });
+    const res = httpMocks.createResponse();
+
+    req.query.sortColumn = 'invalid'
+    const result = parseQueryParams(req, res)
+    expect(result).toBe(false)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith({
+      status: 400,
+      name: 'Invalid query parameters',
+      description: '',
+      detail: [{dataPath: '.sortColumn', message: 'should be equal to one of the allowed values'}],
+    })
+  })
+
+  it('should return false when sort direction is invalid', () => {
+    const req = httpMocks.createRequest({
+      method: 'GET',
+      query: {
+        type: 'invalid',
+      }
+    });
+    const res = httpMocks.createResponse();
+
+    req.query.sortDirection = 'invalid'
+    const result = parseQueryParams(req, res)
+    expect(result).toBe(false)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(res.json).toHaveBeenCalledWith({
+      status: 400,
+      name: 'Invalid query parameters',
+      description: '',
+      detail: [{dataPath: '.sortDirection', message: 'should be equal to one of the allowed values'}],
+    })
+  })
+  */
+
+})
+

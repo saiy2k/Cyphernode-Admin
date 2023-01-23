@@ -14,9 +14,12 @@ export default function Error({
   }, [error]);
 
   return (
-    <div>
-      <p>Something went wrong!</p>
-      <button onClick={() => reset()}>Reset error boundary</button>
+    <div  style={{'padding': '16px'}}>
+      <h3>Something went wrong!</h3>
+      <button onClick={() => reset()} style={{ border: '1px solid #ddd', background: '#777', borderRadius: '5px', padding: '8px' }}>
+        Reset page
+      </button>
+      <p> { JSON.stringify(error, Object.getOwnPropertyNames(error)) } </p>
     </div>
   );
 }

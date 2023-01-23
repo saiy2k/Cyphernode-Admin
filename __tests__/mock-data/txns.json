@@ -1,0 +1,19 @@
+{
+  "mockTxns":
+  [{
+    "category": "generate",
+    "time": 1609459200,
+    "amount": 0.1,
+    "confirmations": 12
+  }, {
+  "category": "generate",
+  "time": 1609459201,
+  "amount": 0.2,
+  "confirmations": 12
+  }, {
+  "category": "generate",
+  "time": 1609459202,
+  "amount": 0.3,
+  "confirmations": 12
+  }]
+}

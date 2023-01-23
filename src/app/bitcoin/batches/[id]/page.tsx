@@ -56,6 +56,11 @@ export default function Batches({
 
   const toast = useToast();
 
+  let savingsPer = 0;
+  if (data && data.outputs && data.outputs?.length > 0) {
+    const txCount = data.outputs.length;
+    savingsPer = (600 + 10 * txCount) * 100 / (600 * txCount);
+  }
   const details = [
     {
       key: 1,
@@ -87,8 +92,7 @@ export default function Batches({
       },
       right: {
         label: 'Approx. Savings',
-        // TODO replace arbitrary savings with proper savings
-        value: '73%'
+        value: (100 - savingsPer).toFixed(0) + '%'
       },
     },
   ];
@@ -127,6 +131,7 @@ export default function Batches({
         const bodyResp = await response.json();
         throw new Error(response.status + ': ' + response.statusText + ': ' + JSON.stringify(bodyResp));
       }
+      debugger;
       const batches = await response.json();
       if (batches.error !== null) {
         throw new Error(JSON.stringify(batches));
@@ -137,13 +142,13 @@ export default function Batches({
           duration: 3000,
           isClosable: true,
         })
+        getAndSetBatch();
       }
     } catch(err) {
       handleError(err);
-      return initialData;
+      // return initialData;
     } finally {
       setExecuteLoading(false);
-      getAndSetBatch();
     }
   }
 
@@ -168,7 +173,10 @@ export default function Batches({
           deleteTrigger={(props: any) => <Button {...props} width={{base: '50%', sm: 200}} h={12}> Execute </Button>}
           onDialogClose={(confirm: boolean) => {
             if(confirm) {
-              executeBatch();
+              executeBatch().catch(err => {
+                debugger;
+                handleError(err)
+              });
             }
           }}
           title="Execute confirmation"
@@ -201,7 +209,7 @@ export default function Batches({
         <Flex flexDirection='column' gap='10px'>
         {
             dataLoading
-            ? details.map(detail => (
+            ? details.map((detail: any) => (
                 <Flex key={detail.key} gap='20px' flexDirection={{base: 'column', sm: 'row'}}>
                   {
                     !(detail.left)
@@ -223,7 +231,7 @@ export default function Batches({
                   }
                 </Flex>
               ))
-            : details.map(detail => (
+            : details.map((detail: any) => (
                 <Flex key={detail.key} gap='20px' flexDirection={{base: 'column', sm: 'row'}}>
                   {
                     !(detail.left)
