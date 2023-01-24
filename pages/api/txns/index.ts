@@ -44,6 +44,7 @@ export default async function handler(
 
   try {
 
+    /*
     if (Math.random() > 0.95) {
       const errorResp: ErrorResponse = {
         status: 500,
@@ -58,6 +59,7 @@ export default async function handler(
       res.status(500).json(errorResp);
       return;
     }
+    */
 
     const validateResponse = parseQueryParams(req, res);
     if (validateResponse === false) {

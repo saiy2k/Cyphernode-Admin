@@ -56,14 +56,14 @@ export type ServerDataTableProps<T> = PropsWithChildren & {
   pageCount: number,
 
   FilterControl?: FilterControlProps<T>,
-  columnFilters: ColumnFiltersState
+  columnFilters?: ColumnFiltersState
   pageIndex: number,
   pageSize: number,
-  sorting: SortingState,
+  sorting?: SortingState,
 
-  onColumnFiltersChange: OnChangeFn<ColumnFiltersState>,
+  onColumnFiltersChange?: OnChangeFn<ColumnFiltersState>,
   onPaginationChange: OnChangeFn<PaginationState>,
-  onSortingChange: OnChangeFn<SortingState>,
+  onSortingChange?: OnChangeFn<SortingState>,
 };
 
 export default function ServerDataTable<T>({
