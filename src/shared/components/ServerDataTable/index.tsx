@@ -214,10 +214,17 @@ export default function ServerDataTable<T>({
               <h6> Refine your filters </h6> 
             </chakra.th> </tr> : null }
 
-            {table.getCoreRowModel().rows.map((row, index: number) => (
+            {table.getCoreRowModel().rows.map((row, index: number) => {
 
+            const onRowClick = DetailComp === undefined
+            ? undefined
+            : () => selectedRowIndex === index
+              ? setSelectedRowIndex(-1)
+              : setSelectedRowIndex(index);
+
+            return (
               <React.Fragment key={row.id}>
-                <tr onClick={ () => selectedRowIndex === index ? setSelectedRowIndex(-1) : setSelectedRowIndex(index) } style={{ 'cursor': 'pointer' }}>
+                <tr onClick={ onRowClick } style={{ 'cursor': 'pointer' }}>
                   {row.getVisibleCells().map(cell => (
                     <Cell key={cell.id} textAlign={cell.id.includes('actions') ? 'left': 'center'}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -233,13 +240,13 @@ export default function ServerDataTable<T>({
 
               </React.Fragment>
 
-            ))}
+            )})}
           </tbody>
         }
 
       </table>
 
-      <Paginator table={table} />
+      <Paginator loading={isLoading} table={table} />
 
     </Widget>
   )

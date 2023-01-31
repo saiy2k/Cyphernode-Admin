@@ -171,6 +171,8 @@ const BitcoinSendWidget = () => {
 
           { errors.amount?.type === 'required' ? 
           <FormErrorMessage> Amount is mandatory </FormErrorMessage>: null }
+          { errors.amount?.type === 'pattern' ? 
+          <FormErrorMessage> {errors.amount.message} </FormErrorMessage>: null }
         </FormControl>
 
         { /* Address field */ }

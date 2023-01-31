@@ -28,3 +28,12 @@ a {
 .chakra-popover__content {
   width: auto !important;
 }
+
+.range-date-picker .chakra-popover__content {
+  width: auto !important;
+  padding: 0 !important;
+}
+
+.range-date-picker .chakra-popover__body {
+  padding: 0 !important;
+}

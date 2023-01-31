@@ -22,6 +22,7 @@ export type RequestQuery = {
   amountMin?: number;
   amountMax?: number;
   status?: QStatusEnum;
+  txid?: string;
 
   sortColumn?: QSortColumnEnum;
   sortDirection?: QSortDirectionEnum;
@@ -97,6 +98,10 @@ export default async function handler(
       filteredTxns = filteredTxns.filter(txn => (query.status === 'pending' && txn.confirmations === 0) || (query.status === 'confirmed' && txn.confirmations !== 0));
     }
 
+    if (query.txid) {
+      filteredTxns = filteredTxns.filter(txn => txn.txid.includes(query.txid!));
+    }
+
     filteredTxns.sort((a: Txn, b: Txn) => {
       if (query.sortColumn === 'type') {
         return query.sortDirection === 'ASC' ? a.category.localeCompare(b.category) : b.category.localeCompare(a.category);
@@ -153,6 +158,7 @@ export function parseQueryParams(
   if (req.query.end) query.end = req.query.end as string;
   if (req.query.type) query.type = req.query.type as QTypeEnum;
   if (req.query.status) query.status = req.query.status as QStatusEnum;
+  if (req.query.txid) query.txid = req.query.txid as string;
 
   if (req.query.sortColumn) query.sortColumn = req.query.sortColumn as QSortColumnEnum;
   if (req.query.sortDirection) query.sortDirection = req.query.sortDirection as QSortDirectionEnum;
@@ -169,6 +175,7 @@ export function parseQueryParams(
       amountMin: { type: 'number' }, // #TODO: amountMin < amountMax
       amountMax: { type: 'number' }, // #TODO: amountMin < amountMax
       status: { type: 'string', enum: QStatus },
+      txid: { type: 'string' },
 
       sortColumn: { type: 'string', enum: QSortColumn },
       sortDirection: { type: 'string', enum: QSortDirection },

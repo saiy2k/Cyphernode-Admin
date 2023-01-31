@@ -8,10 +8,10 @@ export enum API_ID {
 }
 
 const apiIdAndKeyMap = {
-  [API_ID.ZERO]: "5b749a7f05309089519f289f16cbc22ae62e3f7f942509317380a336ead55271",
-  [API_ID.ONE]: "17635a64ed4a82a1d69da9374d3b3b1886e976744187603c9d07c770d9307044",
-  [API_ID.TWO]: "51a63a736a75b70eb279c8633c33d520de87ce81f2140f837ebddae53acb8065",
-  [API_ID.THREE]: "4991548e221f7512922df3f63d3ed9857e4e838112de3fe0a66d00c3d06ec519",
+  [API_ID.ZERO]: "8f5f06648794d63bb87c6414ba7f4f3f52081868ae7ed456b5b26a59fd16690",
+  [API_ID.ONE]: "fac36d600797323d6f0fd458f789b9aaf2ff8b41349a606cadcb71cd9ff619b7",
+  [API_ID.TWO]: "86be503cf5cf8d187b16431662318867164f3c0dac90d43272d1f70013896a8b",
+  [API_ID.THREE]: "74712e04904520cbdb72fdbe22912b261ab47181897b6a2347caa0550e9bbe9e",
 };
 
 const urlAndApiId: any = {
@@ -35,6 +35,9 @@ const urlAndApiId: any = {
   addtobatch: API_ID.TWO,
   removefrombatch: API_ID.TWO,
   batchspend: API_ID.TWO,
+
+  ots_stamp: API_ID.THREE,
+  ots_info: API_ID.THREE,
 };
 
 export function generateKey(url: string) {
@@ -48,7 +51,7 @@ export function generateKey(url: string) {
     apiKey = apiIdAndKeyMap[apiId];
   } else {
     // Other urls not mapped here fallbacks to 002 auth key
-    apiKey = apiIdAndKeyMap[API_ID.ONE];
+    apiKey = apiIdAndKeyMap[API_ID.TWO];
   }
 
   const current = Math.round((new Date().getTime())/1000) + 10;

@@ -63,26 +63,26 @@ export const WatchDetail = ({
     {
       _key: 'address',
       title: 'Address',
-      textComponent: <Text {...textStyles.body}>{type === "address" ? data.address: data.pub32}</Text>,
+      textComponent: (props) => <Text {...props} {...textStyles.body}>{type === "address" ? data.address: data.pub32}</Text>,
       value: data.pub32,
       type: 'text',
       nonEditable: true,
     }, {
       _key: 'label',
       title: 'Label',
-      textComponent: <Text {...textStyles.body}>{data.label}</Text>,
+      textComponent: (props) => <Text {...props} {...textStyles.body}>{data.label}</Text>,
       value: data.label,
       type: 'text',
     }, {
       _key: 'confirmedCallbackURL',
       title: 'Confirmed callback',
-      textComponent: <Text {...textStyles.body}>{data.confirmedCallbackURL}</Text>,
+      textComponent: (props) => <Text {...props} {...textStyles.body}>{data.confirmedCallbackURL}</Text>,
       value: data.confirmedCallbackURL,
       type: 'text',
     }, {
       _key: 'unconfirmedCallbackURL',
       title: 'Unconfirmed callback',
-      textComponent: <Text {...textStyles.body}>{data.unconfirmedCallbackURL}</Text>,
+      textComponent: (props) => <Text {...props} {...textStyles.body}>{data.unconfirmedCallbackURL}</Text>,
       value: data.unconfirmedCallbackURL,
       type: 'text',
     }
@@ -92,7 +92,7 @@ export const WatchDetail = ({
     const derivationPathRow = {
       _key: 'derivation_path',
       title: 'Path',
-      textComponent: <Text {...textStyles.body}>{data.derivation_path}</Text>,
+      textComponent: (props: any) => <Text {...props} {...textStyles.body}>{data.derivation_path}</Text>,
       value: data.derivation_path,
       type: 'text',
     };
@@ -133,11 +133,16 @@ export const WatchDetail = ({
           />
         ))
       }
-      <Flex gap='10px' alignSelf='end'>
+      <Flex gap='10px' alignSelf={{base: 'start', md: 'end'}}>
         {
           onEdit
           ? editMode
-            ? <Button width={{base: '45%', sm: 120}} h={12} onClick={() => saveChanges() }> Save Changes </Button>
+            ? (
+                <>
+                  <Button width={{base: '45%', sm: 120}} h={12} onClick={() => saveChanges() }> Save Changes </Button>
+                  <Button width={{base: '45%', sm: 120}} h={12} onClick={() => setEditMode(false) }> Cancel </Button>
+                </>
+              )
             : <Button width={{base: '45%', sm: 120}} h={12} onClick={() => setEditMode(true) }> Edit </Button>
           : null
         }

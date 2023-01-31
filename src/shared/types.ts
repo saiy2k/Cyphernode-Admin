@@ -102,8 +102,8 @@ export type DetailCell = {
 
 export type DetailRow = {
   key: number;
-  left: DetailCell;
-  right: DetailCell;
+  left?: DetailCell;
+  right?: DetailCell;
 };
 
 export { type SuccessResponse, type ErrorResponse } from './api.types';
@@ -134,4 +134,13 @@ export type AddToBatchPayload = {
   amount: number,
   batcherId: number,
   webhookUrl: string,
+};
+
+export type OTS_StampPayload = {
+  hash: string,
+  callbackURL: string,
+};
+
+export type OTS_GetInfoPayload = {
+  hash: string,
 };

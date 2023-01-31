@@ -20,11 +20,15 @@ import ServerDataTable from '@shared/components/ServerDataTable';
 import { dummyTxnDataForSkeleton } from '@shared/constants';
 import { getCallProxy } from '@shared/services/api';
 import { Txn } from '@shared/types';
-import { ColumnFilter, ColumnFiltersState, PaginationState } from '@tanstack/react-table';
+import { ColumnFilter, ColumnFiltersState, PaginationState, SortingState } from '@tanstack/react-table';
 import { RangeDatepicker } from 'chakra-dayzed-datepicker';
 import { useEffect, useState } from 'react';
 import { useErrorHandler } from 'react-error-boundary';
 import { SubmitHandler, useForm } from 'react-hook-form';
+
+import { withErrorBoundary } from 'react-error-boundary';
+import { ErrorBoundaryFallback } from '@shared/components/ErrorBoundaryFallback';
+
 
 type Inputs = {
   type: string,
@@ -40,6 +44,10 @@ export default function Lightning() {
   const [ txnDataLoading, setTxnDataLoading ] = useState<boolean>(true);
   const [ pageCount, setPageCount ] = useState(0);
   const [ filters, setFilters ] = useState({});
+  const [sorting, setSorting] = useState<SortingState>([{
+    id: "time",
+    desc: true
+  }])
 
   const formVars = useForm<Inputs>({
     defaultValues: {
@@ -67,10 +75,10 @@ export default function Lightning() {
       console.log('Home :: useEffect :: call API :: txns');
       try {
 
-        // const filters = reduceColumnFilters(columnFilters);
-        // const filters = {};
+        const sortColumn = sorting.length === 1 ? sorting[0].id : '';
+        const sortDirection = sorting.length === 1 ? sorting[0].desc ? 'DESC' : 'ASC' : '';
 
-        const response = await getCallProxy('txns', { perPage: pageSize, page: pageIndex, ...filters });
+        const response = await getCallProxy('txns', { perPage: pageSize, page: pageIndex, ...filters, sortColumn, sortDirection });
         if (!response.ok) {
           const bodyResp = await response.json();
           throw new Error(response.status + ': ' + response.statusText + ': ' + JSON.stringify(bodyResp));
@@ -87,7 +95,7 @@ export default function Lightning() {
       }
     })();
 
-  }, [pageIndex, pageSize, filters]);
+  }, [pageIndex, pageSize, filters, sorting]);
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     console.log('Lightning :: onSubmit');
@@ -200,7 +208,10 @@ export default function Lightning() {
         pageIndex={pageIndex}
         pageSize={pageSize}
 
+        sorting={sorting}
+
         onPaginationChange={setPagination}
+        onSortingChange={setSorting}
 
         DetailComp={TxnDetail}
       />
@@ -235,7 +246,7 @@ const columns = [{
   accessorKey: 'txid',
   header: () => <span> Tx id </span>,
   cell: (info: any) => (info.getValue() as any).slice(0, 12) + '...',
-  enableSorting: true,
+  enableSorting: false,
   width: 'auto',
 }, {
   id: 'confirmations',

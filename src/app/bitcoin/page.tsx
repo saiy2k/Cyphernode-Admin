@@ -20,7 +20,7 @@ export default function Bitcoin() {
   const [showReceive, setShowReceive] = useState<boolean>(false);
 
   return (
-    <Widget>
+    <Widget padding={{base: '5px', md: '20px'}}>
       <Flex justifyContent='space-between' flexDirection={{base: 'column', sm: 'row'}} gap={{base: 10}} >
 
         <OnChainBalance />

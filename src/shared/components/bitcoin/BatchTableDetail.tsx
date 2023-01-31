@@ -56,15 +56,32 @@ export const BatchDetail = ({
     {
       _key: 'batcherLabel',
       title: 'Label',
-      textComponent: <Text {...textStyles.body}>{data.batcherLabel}</Text>,
+      textComponent: (props) => <Text {...textStyles.body}>{data.batcherLabel}</Text>,
       value: data.batcherLabel,
       type: 'text',
-    }, {
+    },
+    {
       _key: 'confTarget',
       title: 'Target',
-      textComponent: <Text {...textStyles.body}>{data.confTarget}</Text>,
+      textComponent: (props) => <Text {...textStyles.body}>{data.confTarget}</Text>,
       value: data.confTarget,
       type: 'text',
+    },
+    {
+      _key: 'txnCount',
+      title: 'Txn Count',
+      textComponent: (props) => <Text {...textStyles.body}>{data.nbOutputs}</Text>,
+      value: data.confTarget,
+      type: 'text',
+      nonEditable: true,
+    },
+    {
+      _key: 'amount',
+      title: 'Amount',
+      textComponent: (props) => <Text {...textStyles.body}>{data.total}</Text>,
+      value: data.confTarget,
+      type: 'text',
+      nonEditable: true,
     },
   ];
 
@@ -84,29 +101,36 @@ export const BatchDetail = ({
   }
 
   return (
-    <Flex flexDirection='column' gap='20px' my={2}>
-      {
-        detailRows.map((row: DetailRowData) => (
-          <DetailRow
-            key={row._key}
-            _key={row._key}
-            title={row.title}
-            value={row.value}
-            textComponent={row.textComponent}
-            type={row.type}
-            options={row.options}
-            nonEditable={row.nonEditable}
-            editMode={editMode}
-            onChange={onValueChange}
-          />
-        ))
-      }
+    <Flex flexDirection='column' gap='20px' my={2} width={{base: 'calc(100vw - 80px)', lg: 'auto'}}>
+      <Flex flexDirection={{base: 'column', md: 'row'}} justifyContent='space-between' alignItems={{base: 'flex-start', md: 'center'}} gap='20px' my={2}>
+        {
+          detailRows.map((row: DetailRowData) => (
+            <DetailRow
+              key={row._key}
+              _key={row._key}
+              title={row.title}
+              value={row.value}
+              textComponent={row.textComponent}
+              type={row.type}
+              options={row.options}
+              nonEditable={row.nonEditable}
+              editMode={editMode}
+              onChange={onValueChange}
+            />
+          ))
+        }
+      </Flex>
 
-      <Flex gap='10px' alignSelf='end'>
+      <Flex gap='10px' alignSelf={{base: 'start', xl: 'end'}}>
         {
           onEdit
           ? editMode
-            ? <Button width={{base: 'auto', sm: 120}} h={12} onClick={() => saveChanges() }> Save Changes </Button>
+            ? (
+                <>
+                  <Button width={{base: '45%', sm: 120}} h={12} onClick={() => saveChanges() }> Save Changes </Button>
+                  <Button width={{base: '45%', sm: 120}} h={12} onClick={() => setEditMode(false) }> Cancel </Button>
+                </>
+              )
             : <Button width={{base: 'auto', sm: 120}} h={12} onClick={() => setEditMode(true) }> Edit </Button>
           : null
         }

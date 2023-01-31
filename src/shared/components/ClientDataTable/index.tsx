@@ -188,10 +188,15 @@ export default function ClientDataTable<T>({
               .getRowModel()
               .rows
               .map((row, index) => {
-
+                
+                const onRowClick = DetailComp === undefined
+                                    ? undefined
+                                    : () => selectedRowIndex === index
+                                      ? setSelectedRowIndex(-1)
+                                      : setSelectedRowIndex(index);
                 return (
                   <React.Fragment key={row.id}>
-                    <tr onClick={ () => selectedRowIndex === index ? setSelectedRowIndex(-1) : setSelectedRowIndex(index) } style={{ 'cursor': 'pointer' }}>
+                    <tr onClick={ onRowClick } style={{ 'cursor': 'pointer' }}>
                       {row.getVisibleCells().map(cell => (
                         <Cell key={cell.id} textAlign={cell.id.includes('actions') ? 'left': 'center'}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -213,7 +218,7 @@ export default function ClientDataTable<T>({
 
       </table>
 
-      { useMemo(() => <Paginator table={table} />, [table.getState().pagination.pageIndex, table.getState().pagination.pageSize]) }
+      { useMemo(() => <Paginator loading={isLoading} table={table} />, [table.getState().pagination.pageIndex, table.getState().pagination.pageSize]) }
 
     </Widget>
   );

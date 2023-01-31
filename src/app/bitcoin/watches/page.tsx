@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 
 import { Box, Button, Flex, useToast } from '@chakra-ui/react';
 
@@ -12,6 +12,7 @@ import WatchForm from '@shared/components/bitcoin/WatchForm';
 import { useErrorHandler } from 'react-error-boundary';
 import { Watch, WatchAddressPayload, WatchXPubPayload } from '@shared/types';
 import { getCallProxy, postCallProxy } from '@shared/services/api';
+import { ContentContainerRefContext } from 'app/layout';
 const emptyArray: Watch[] = [];
 
 export default function Watches() {
@@ -28,6 +29,8 @@ export default function Watches() {
   const handleError = useErrorHandler();
 
   const toast = useToast();
+
+  const contentContainerRefContext = useContext(ContentContainerRefContext)
 
   async function getWatches(type: ("address" | "xpub")) {
     try {
@@ -73,6 +76,15 @@ export default function Watches() {
     })();
   }, []);
 
+  const scrollToTop = () => {
+    if(contentContainerRefContext && contentContainerRefContext.current) {
+      contentContainerRefContext.current.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  }
+
   return (
     <Widget>
       <Flex justifyContent='end' flexDirection={{base: 'column', sm: 'row'}} gap={{base: 10}} >
@@ -90,11 +102,11 @@ export default function Watches() {
       <Flex flexDirection={{base: 'column', xxl: 'row'}} justifyContent='stretch' gap='10px'>
         <div>
           <h2 style={{marginTop: 10, marginBottom: 15}}> By address </h2>
-          { useMemo(() => <BitcoinWatchTable type="address" isLoading={addressDataLoading} data={watchAddressData} onEdit={(watchObject: Watch) => {getAndSetAddressWatches()}} onUnWatch={() => {getAndSetAddressWatches()}} />, [watchAddressData, addressDataLoading]) }
+          { useMemo(() => <BitcoinWatchTable type="address" isLoading={addressDataLoading} data={watchAddressData} onEdit={(watchObject: Watch) => {getAndSetAddressWatches()}} onUnWatch={() => {getAndSetAddressWatches(); scrollToTop();}} />, [watchAddressData, addressDataLoading]) }
         </div>
         <div>
           <h2 style={{marginTop: 10, marginBottom: 15}}> By *pub </h2>
-          { useMemo(() => <BitcoinWatchTable type="xpub" isLoading={xpubDataLoading} data={watchXpubData} onEdit={(watchObject: Watch) => {getAndSetXPubWatches()}} onUnWatch={() => {getAndSetXPubWatches()}} />, [watchXpubData, xpubDataLoading]) }
+          { useMemo(() => <BitcoinWatchTable type="xpub" isLoading={xpubDataLoading} data={watchXpubData} onEdit={(watchObject: Watch) => {getAndSetXPubWatches()}} onUnWatch={() => {getAndSetXPubWatches(); scrollToTop();}} />, [watchXpubData, xpubDataLoading]) }
         </div>
       </Flex>
 

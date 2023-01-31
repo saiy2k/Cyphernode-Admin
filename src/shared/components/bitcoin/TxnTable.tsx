@@ -212,7 +212,7 @@ function Filter({
       <div className="h-1" />
     </div>
   ) : column.id === "time" ? (
-    <div style={{ marginLeft: '20px' }}>
+    <div className='range-date-picker' style={{ marginLeft: '20px' }}>
       <RangeDatepicker
         disabled={disabled}
         propsConfigs={{
@@ -263,28 +263,31 @@ function reduceColumnFilters(columnFilters: ColumnFiltersState) {
   return columnFilters.reduce((prev: any, cur: ColumnFilter & {value: any}) => {
     switch(cur.id) {
       case 'type':
-      prev['type'] = cur.value.toLowerCase();
+        prev['type'] = cur.value.toLowerCase();
         break;
       case 'time':
-      if(cur.value[0] !== undefined) {
-        prev['start'] = new Date(cur.value[0] * 1000).toISOString();
-      }
+        if(cur.value[0] !== undefined) {
+          prev['start'] = new Date(cur.value[0] * 1000).toISOString();
+        }
 
         if(cur.value[1] !== undefined) {
           prev['end'] = new Date(cur.value[1] * 1000).toISOString();
         }
         break;
       case 'amount':
-      if(cur.value[0]) {
-        prev['amountMin'] = Number(cur.value[0]);
-      }
+        if(cur.value[0]) {
+          prev['amountMin'] = Number(cur.value[0]);
+        }
 
         if(cur.value[1]) {
           prev['amountMax'] = Number(cur.value[1]);
         }
         break;
       case 'confirmations':
-      prev['status'] = cur.value.toLowerCase();
+        prev['status'] = cur.value.toLowerCase();
+        break;
+      case 'txid':
+        prev['txid'] = cur.value.toLowerCase();
         break;
     }
 

@@ -15,15 +15,19 @@ import './globals.css'
 
 import { inter, getBullBitcoinTheme } from '@theme/index';
 import SideMenu from './SideMenu';
+import { createContext, MutableRefObject, useRef } from 'react';
 
 const theme = getBullBitcoinTheme();
 
+const ContentContainerRefContext = createContext<null | MutableRefObject<any>>(null);
+export { ContentContainerRefContext };
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const contentContainerRef = useRef(null);
   return (
     <html lang="en">
       {/*
@@ -33,7 +37,7 @@ export default function RootLayout({
       <head />
 
       <body className={inter.className} style={{overflow: 'hidden'}}>
-        <Flex flexDirection="column" height="100vh" overflowY='hidden'>
+        <Flex flexDirection="column" height="100vh" overflowY='visible'>
           <ColorModeScript initialColorMode={theme.config.initialColorMode} />
           <ChakraProvider theme={theme}>
 
@@ -44,11 +48,13 @@ export default function RootLayout({
 
               <SideMenu />
 
-              <Box flex={7} overflowY='auto'>
-                <Box marginX='auto' maxW={{base: '100%', xxxl: '80%'}}>
-                  {children}
-                </Box>
-                <Footer />
+              <Box flex={7} overflowY='auto' id='content-container' ref={contentContainerRef}>
+                <ContentContainerRefContext.Provider value={contentContainerRef}>
+                  <Box marginX='auto' maxW={{base: '100%', xxxl: '80%'}}>
+                    {children}
+                  </Box>
+                  <Footer />
+                </ContentContainerRefContext.Provider>
               </Box>
             </Flex>
           </ChakraProvider>

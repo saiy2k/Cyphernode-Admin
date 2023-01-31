@@ -1,4 +1,4 @@
-import React, { PropsWithChildren } from 'react';
+import React, { PropsWithChildren, useRef, useState } from 'react';
 
 import {
   chakra,
@@ -10,11 +10,16 @@ import {
 
 import { Table } from '@tanstack/react-table';
 
-export type PaginatorProps<T> = PropsWithChildren & {
-  table: Table<T>
+export type PaginatorProps = PropsWithChildren & {
+  table: Table<any>,
+  loading?: boolean,
 };
 
-export default function Paginator<T>({table}: PaginatorProps<T>) {
+export default function Paginator({table, loading}: PaginatorProps) {
+  const disabled = loading;
+  const [page, setPage] = useState(0);
+  const goToRef = useRef<HTMLInputElement>(null);
+
   return (
     <>
       <Flex flexDirection={{base: 'column-reverse', md: 'row'}} my={2} w='100%' justifyContent='end' alignItems={{base: 'flex-start',md: 'center'}} gap={5} marginTop={'25px'}>
@@ -30,18 +35,30 @@ export default function Paginator<T>({table}: PaginatorProps<T>) {
         <span className="flex items-center gap-1">
           Go to
           <Input
+            disabled={disabled}
             size='sm'
             ml={2}
             width='100px'
             type="number"
+            value={page}
             defaultValue={table.getState().pagination.pageIndex + 1}
             onChange={e => {
               const page = e.target.value ? Number(e.target.value) - 1 : 0
-              table.setPageIndex(page)
+              table.setPageIndex(page);
+              setPage(page + 1);
+
+              if((page + 1) > table.getPageCount()) {
+                setTimeout(() => {
+                  setPage(table.getPageCount());
+                }, 1000);
+              }
             }}
+            ref={goToRef}
+            onClick={() => goToRef.current?.select()}
           />
         </span>
         <Select
+          disabled={disabled}
           size='sm'
           w='120px'
           value={table.getState().pagination.pageSize}
@@ -61,7 +78,7 @@ export default function Paginator<T>({table}: PaginatorProps<T>) {
             size='sm'
             variant='outline'
             onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
+            disabled={disabled || !table.getCanPreviousPage()}
           >
             {'<<'}
           </Button>
@@ -69,7 +86,7 @@ export default function Paginator<T>({table}: PaginatorProps<T>) {
             size='sm'
             variant='outline'
             onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            disabled={disabled || !table.getCanPreviousPage()}
           >
             {'<'}
           </Button>
@@ -77,7 +94,7 @@ export default function Paginator<T>({table}: PaginatorProps<T>) {
             size='sm'
             variant='outline'
             onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            disabled={disabled || !table.getCanNextPage()}
           >
             {'>'}
           </Button>
@@ -85,7 +102,7 @@ export default function Paginator<T>({table}: PaginatorProps<T>) {
             size='sm'
             variant='outline'
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
+            disabled={disabled || !table.getCanNextPage()}
           >
             {'>>'}
           </Button>

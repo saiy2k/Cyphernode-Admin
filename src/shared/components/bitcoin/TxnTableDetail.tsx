@@ -53,10 +53,6 @@ export const TxnDetail = ({row}: TxnDetailProps) => {
       left: {
         title: 'Confirmed block',
         value: <Text {...textStyles.body}>{row.original.confirmations}</Text>
-      },
-      right: {
-        title: '',
-        value: ''
       }
     },
     {
@@ -76,7 +72,17 @@ export const TxnDetail = ({row}: TxnDetailProps) => {
         title: 'Transaction ID',
         value: (
           <Flex alignItems='center'>
-            <Text whiteSpace={{base: 'nowrap', md: 'normal'}} overflow={{base: 'hidden', md: 'unset'}} width={{base: '150px', md: 'auto'}} textOverflow='ellipsis' {...textStyles.body} maxW='400px'>
+            <Text
+              whiteSpace={{base: 'nowrap', md: 'normal'}}
+              overflow={{base: 'hidden', md: 'unset'}}
+              width={{
+                base: 'calc(100vw - 150px)', // 150px = ((5px [padding] + 20px [padding]) * 2) + (40px [copy and link buttons] * 2) + 20px [scroll bar]
+                md: 'auto'
+              }}
+              textOverflow='ellipsis'
+              {...textStyles.body}
+              maxW='400px'
+            >
               { row.original.txid }
             </Text>
             <IconButton 
@@ -89,6 +95,14 @@ export const TxnDetail = ({row}: TxnDetailProps) => {
                 showToast();
               }}
             />
+            <Link target='_blank' href={`https://mempool.space/tx/${row.original.txid}`}>
+              <IconButton 
+                aria-label='Open address in mempool.space' 
+                icon={<MdLink />}  
+                variant='outline'
+                ml={2} w={6} h={6}
+              />
+            </Link>
           </Flex>
         )
       },
@@ -96,7 +110,17 @@ export const TxnDetail = ({row}: TxnDetailProps) => {
         title: 'Address',
         value: (
           <Flex alignItems='center'>
-            <Text whiteSpace={{base: 'nowrap', md: 'normal'}} overflow={{base: 'hidden', md: 'unset'}} width={{base: '150px', md: 'auto'}} textOverflow='ellipsis' {...textStyles.body} maxW='400px'>
+            <Text
+              whiteSpace={{base: 'nowrap', md: 'normal'}}
+              overflow={{base: 'hidden', md: 'unset'}}
+              width={{
+                base: 'calc(100vw - 150px)', // 150px = ((5px [padding] + 20px [padding]) * 2) + (40px [copy and link buttons] * 2) + 20px [scroll bar]
+                md: 'auto'
+              }}
+              textOverflow='ellipsis'
+              {...textStyles.body}
+              maxW='400px'
+            >
               { row.original.address }
             </Text>
             <IconButton 
@@ -114,11 +138,7 @@ export const TxnDetail = ({row}: TxnDetailProps) => {
                 aria-label='Open address in mempool.space' 
                 icon={<MdLink />}  
                 variant='outline'
-                ml={2} w={6} h={6} 
-                onClick={() => {
-                  onCopyAddress();
-                  showToast();
-                }}
+                ml={2} w={6} h={6}
               />
             </Link>
           </Flex>
@@ -148,15 +168,28 @@ function DetailRow(props: DetailRowProps) {
   const row: DetailRow = props.row;
 
   return (
-    <Flex flexDirection={{base: 'column', lg: 'row'}}>
-      <Box mb={2} flex={1}>
-        <b> {row.left.title} </b>
-        {row.left.value}
-      </Box>
-      <Box mb={2} flex={1}>
-        <b> {row.right.title} </b>
-        {row.right.value}
-      </Box>
+    <Flex flexDirection={{base: 'column', lg: 'row'}} gap={{base: '20px', md: '0px'}}>
+      {
+        !row.left
+        ? null
+        : (
+            <Box mb={2} flex={1}>
+              <b> {row.left.title} </b>
+              {row.left.value}
+            </Box>
+          )
+      }
+
+      {
+        !row.right
+        ? null
+        : (
+            <Box mb={2} flex={1}>
+              <b> {row.right.title} </b>
+              {row.right.value}
+            </Box>
+          )
+      }
     </Flex>
   );
 }
