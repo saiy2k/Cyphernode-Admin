@@ -143,4 +143,21 @@ export type OTS_StampPayload = {
 
 export type OTS_GetInfoPayload = {
   hash: string,
+}
+
+export type Wasabi = {
+  type: ("IN" | "OUT"),
+  date: string,
+  sats: number,
+  fee: number,
+  txnId: string,
+  status: ("pending" | "confirmed"),
+  inputAddress: string,
+  outputAddress: string,
+  confirmations: number,
+  confirmedBlock: number,
+}
+
+export type WasabiSendPayload = {
+  
 };

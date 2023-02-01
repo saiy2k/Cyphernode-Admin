@@ -15,8 +15,8 @@ import {
 import { RangeDatepicker } from 'chakra-dayzed-datepicker';
 import { useErrorHandler, withErrorBoundary } from 'react-error-boundary';
 
-import { CustomColumnDef, Txn, SuccessResponse } from '@shared/types';
-import { TxnDetail } from './TxnTableDetail';
+import { CustomColumnDef, Wasabi } from '@shared/types';
+import { WasabiTxnDetail } from './WasabiTxnDetail';
 import { dummyTxnDataForSkeleton } from '@shared/constants';
 import { getCallProxy } from '@shared/services/api';
 import { ErrorBoundaryFallback } from '../ErrorBoundaryFallback';
@@ -24,11 +24,11 @@ import { DebouncedInput } from 'shared/components/DebouncedInput';
 
 import ServerDataTable, { FilterProps } from '@shared/components/ServerDataTable';
 
-export const BitcoinTxnTable = () => {
+export const WasabiTxnTable = () => {
 
-  console.log('Render: BitcoinTxnTable');
+  console.log('Render: WasabiTxnTable');
 
-  const [ txData, setTxData ] = useState<Txn[]>([]);
+  const [ txData, setTxData ] = useState<Wasabi[]>([]);
   const [ txnDataLoading, setTxnDataLoading ] = useState<boolean>(true);
   const [ pageCount, setPageCount ] = useState(0);
 
@@ -52,18 +52,69 @@ export const BitcoinTxnTable = () => {
       console.log('Home :: useEffect :: call API :: txns');
       try {
 
-        const filters = reduceColumnFilters(columnFilters);
-        const sortColumn = sorting.length === 1 ? sorting[0].id : '';
-        const sortDirection = sorting.length === 1 ? sorting[0].desc ? 'DESC' : 'ASC' : '';
+        // const filters = reduceColumnFilters(columnFilters);
+        // const sortColumn = sorting.length === 1 ? sorting[0].id : '';
+        // const sortDirection = sorting.length === 1 ? sorting[0].desc ? 'DESC' : 'ASC' : '';
 
-        const response = await getCallProxy('txns', { perPage: pageSize, page: pageIndex, ...filters, sortColumn, sortDirection });
-        if (!response.ok) {
-          const bodyResp = await response.json();
-          throw new Error(response.status + ': ' + response.statusText + ': ' + JSON.stringify(bodyResp));
-        }
-        const txns: SuccessResponse = await response.json();
-        setTxData(txns.data);
-        setPageCount(txns.meta.pageCount);
+        // const response = await getCallProxy('txns', { perPage: pageSize, page: pageIndex, ...filters, sortColumn, sortDirection });
+        // if (!response.ok) {
+        //   const bodyResp = await response.json();
+        //   throw new Error(response.status + ': ' + response.statusText + ': ' + JSON.stringify(bodyResp));
+        // }
+        // const txns: SuccessResponse = await response.json();
+        // setTxData(txns.data);
+        // setPageCount(txns.meta.pageCount);
+        setPageCount(10);
+        setTxData([
+          {
+            date: "2023-01-30T07:25:05.592Z",
+            fee: 300,
+            sats: 5000,
+            status: "confirmed",
+            txnId: "tx928492850298520",
+            type: "IN",
+            inputAddress: "bc1qfl6822wnkvhq4gza64rmv7spwdlpwq8n2yfke4wq8n2yfke4",
+            outputAddress: "bc1qxj93vd2n3nkycne4c4hmydzfqr4p2tznqka2uz2tznqka2uz",
+            confirmations: 10,
+            confirmedBlock: 100,
+          },
+          {
+            date: "2022-12-30T07:25:05.592Z",
+            fee: 300,
+            sats: 3000,
+            status: "pending",
+            txnId: "tx928492850298520",
+            type: "OUT",
+            inputAddress: "bc1qfl6822wnkvhq4gza64rmv7spwdlpwq8n2yfke4wq8n2yfke4",
+            outputAddress: "bc1qxj93vd2n3nkycne4c4hmydzfqr4p2tznqka2uz2tznqka2uz",
+            confirmations: 15,
+            confirmedBlock: 150,
+          },
+          {
+            date: "2022-11-30T07:25:05.592Z",
+            fee: 300,
+            sats: 7000,
+            status: "confirmed",
+            txnId: "tx928492850298520",
+            type: "IN",
+            inputAddress: "bc1qfl6822wnkvhq4gza64rmv7spwdlpwq8n2yfke4wq8n2yfke4",
+            outputAddress: "bc1qxj93vd2n3nkycne4c4hmydzfqr4p2tznqka2uz2tznqka2uz",
+            confirmations: 20,
+            confirmedBlock: 200,
+          },
+          {
+            date: "2022-10-30T07:25:05.592Z",
+            fee: 300,
+            sats: 9000,
+            status: "pending",
+            txnId: "tx928492850298520",
+            type: "OUT",
+            inputAddress: "bc1qfl6822wnkvhq4gza64rmv7spwdlpwq8n2yfke4wq8n2yfke4",
+            outputAddress: "bc1qxj93vd2n3nkycne4c4hmydzfqr4p2tznqka2uz2tznqka2uz",
+            confirmations: 25,
+            confirmedBlock: 250,
+          }
+        ]);
         setTxnDataLoading(false);
       } catch(err) {
         setTxnDataLoading(false);
@@ -94,47 +145,59 @@ export const BitcoinTxnTable = () => {
       onPaginationChange={setPagination}
       onSortingChange={setSorting}
 
-      DetailComp={TxnDetail}
+      DetailComp={WasabiTxnDetail}
     />
   );
 
 }
 
-const columns = [{
+const columns = [
+{
   id: 'type',
-  accessorKey: 'category',
+  accessorKey: 'type',
   header: () => <chakra.span> Type </chakra.span>,
   cell: (info: any) => info.getValue(),
   fieldType: 'select',
-  options: ["generate", "immature", "receive", "send"],
+  options: ["IN", "OUT"],
   width: 'auto',
-}, {
-  id: 'time',
-  accessorKey: 'time',
-  header: () => <span> Time </span>,
-  cell: (info: any) => new Date((info.getValue() as any) * 1000).toLocaleString(),
+},
+{
+  id: 'date',
+  accessorKey: 'date',
+  header: () => <span> Date </span>,
+  cell: (info: any) => new Date((info.getValue() as any)).toLocaleString(),
   width: 'auto',
-  fieldType: 'select',
-}, {
-  id: 'amount',
-  accessorKey: 'amount',
-  header: () => <span> btc </span>,
+  fieldType: 'date',
+},
+{
+  id: 'sats',
+  accessorKey: 'sats',
+  header: () => <span> Sats </span>,
   cell: (info: any) => (info.getValue() as any).toFixed(8),
   fieldType: 'number',
   width: '150px',
-}, {
-  id: 'txid',
-  accessorKey: 'txid',
-  header: () => <span> Tx id </span>,
+},
+{
+  id: 'fee',
+  accessorKey: 'fee',
+  header: () => <span> Fee </span>,
+  cell: (info: any) => (info.getValue() as any).toFixed(8),
+  fieldType: 'number',
+  width: '150px',
+},
+{
+  id: 'txnId',
+  accessorKey: 'txnId',
+  header: () => <span> Txn ID </span>,
   cell: (info: any) => (info.getValue() as any).slice(0, 12) + '...',
   enableSorting: true,
   width: 'auto',
-}, {
-  id: 'confirmations',
-  // accessorKey: 'confirmations',
-  accessorFn: (row: any) => (Boolean(row.confirmations) && row.confirmations > 0) ?'Confirmed': 'Pending',
-  header: () => <span> Status </span>,
-  cell: (info: any) => info.cell.row.original.confirmations ===0 ? 'Pending': `Confirmation(${info.cell.row.original.confirmations})`,
+},
+{
+  id: 'status',
+  accessorKey: 'status',
+  header: () => <chakra.span> Status </chakra.span>,
+  cell: (info: any) => info.getValue(),
   fieldType: 'select',
   options: ["pending", "confirmed"],
   width: 'auto',
@@ -146,10 +209,10 @@ function Filter({
   selectedDates,
   setSelectedDates,
   loading
-}: FilterProps<Txn>) {
+}: FilterProps<Wasabi>) {
   const columnFilterValue = column.getFilterValue()
 
-  const columnDef = (column.columnDef as CustomColumnDef<Txn>);
+  const columnDef = (column.columnDef as CustomColumnDef<Wasabi>);
 
   const disabled = loading;
 
@@ -254,41 +317,38 @@ function Filter({
   )
 }
 
-const BitcoinTxnTableWithErrorBoundary = withErrorBoundary(BitcoinTxnTable, {
+const WasabiTxnTableWithErrorBoundary = withErrorBoundary(WasabiTxnTable, {
   fallbackRender: (fallbackProps) => (<ErrorBoundaryFallback {...fallbackProps} title='Transaction table' />)
 });
 
-export default BitcoinTxnTableWithErrorBoundary;
+export default WasabiTxnTableWithErrorBoundary;
 
 function reduceColumnFilters(columnFilters: ColumnFiltersState) {
   return columnFilters.reduce((prev: any, cur: ColumnFilter & {value: any}) => {
     switch(cur.id) {
       case 'type':
-        prev['type'] = cur.value.toLowerCase();
+      prev['type'] = cur.value.toLowerCase();
         break;
       case 'time':
-        if(cur.value[0] !== undefined) {
-          prev['start'] = new Date(cur.value[0] * 1000).toISOString();
-        }
+      if(cur.value[0] !== undefined) {
+        prev['start'] = new Date(cur.value[0] * 1000).toISOString();
+      }
 
         if(cur.value[1] !== undefined) {
           prev['end'] = new Date(cur.value[1] * 1000).toISOString();
         }
         break;
       case 'amount':
-        if(cur.value[0]) {
-          prev['amountMin'] = Number(cur.value[0]);
-        }
+      if(cur.value[0]) {
+        prev['amountMin'] = Number(cur.value[0]);
+      }
 
         if(cur.value[1]) {
           prev['amountMax'] = Number(cur.value[1]);
         }
         break;
       case 'confirmations':
-        prev['status'] = cur.value.toLowerCase();
-        break;
-      case 'txid':
-        prev['txid'] = cur.value.toLowerCase();
+      prev['status'] = cur.value.toLowerCase();
         break;
     }
 

@@ -137,11 +137,15 @@ import BitcoinSendWidget from './bitcoin/SendWidget';
 import BitcoinTxnTable from './bitcoin/TxnTable';
 import BitcoinWatchTable from './bitcoin/WatchClientTable';
 import BitcoinBatchTable from './bitcoin/BatchTable';
+import WasabiTxnTable from './wasabi/WasabiTxnTable';
+import { WasabiTxnDetail } from './wasabi/WasabiTxnDetail';
 
 export { 
   BitcoinTxnTable, BitcoinSendWidget, BitcoinReceiveWidget,
   BitcoinWatchTable,
   BitcoinBatchTable,
+  WasabiTxnTable,
+  WasabiTxnDetail,
 };
 
 export {

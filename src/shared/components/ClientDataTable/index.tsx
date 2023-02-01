@@ -54,14 +54,6 @@ export default function ClientDataTable<T>({
     });
   }
 
-    /*
-  useEffect(() => {
-    console.log(sorting);
-    console.log(selectedRowIndex);
-    console.log(columnFilters);
-  }, [sorting, selectedRowIndex, columnFilters]);
-     */
-
   useEffect(() => {
 
     if (columnsToHideInMobile.length === 0) return;
@@ -179,10 +171,10 @@ export default function ClientDataTable<T>({
           :
           <tbody>
 
-            {table.getRowModel().rows.length === 0 ? <tr> <chakra.th colSpan={5} textAlign="center" pt={12} pb={8}>
+            {table.getRowModel().rows.length === 0 ? <tr><chakra.th colSpan={5} textAlign="center" pt={12} pb={8}>
               <h2> Empty results </h2> 
               <h6> Refine your filters </h6> 
-            </chakra.th> </tr> : null }
+            </chakra.th></tr> : null }
 
             {table
               .getRowModel()
@@ -218,7 +210,7 @@ export default function ClientDataTable<T>({
 
       </table>
 
-      { useMemo(() => <Paginator loading={isLoading} table={table} />, [table.getState().pagination.pageIndex, table.getState().pagination.pageSize]) }
+      { useMemo(() => <Paginator loading={isLoading} table={table} />, [table.getState().pagination.pageIndex, table.getState().pagination.pageSize, isLoading]) }
 
     </Widget>
   );
