@@ -13,6 +13,7 @@ import {
   useToast,
   Flex,
   Switch,
+  Select,
 } from '@chakra-ui/react';
 
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -29,8 +30,7 @@ type Inputs = {
   amount: string,
   address: string,
   label: string,
-  minAnonSet: number,
-  isPrivate: boolean,
+  instanceId: number,
 };
 
 const WasabiSendForm = () => {
@@ -94,13 +94,50 @@ const WasabiSendForm = () => {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     console.log('Form is valid');
-    console.log(data);
-    const payload: WasabiSendPayload = {};
+    const payload: WasabiSendPayload = {
+      ...data,
+      amount: Number(data.amount),
+      instanceId: Number(data.instanceId),
+      minanonset: 2,
+      private: true,
+    };
     send(payload);
   };
 
   const send = async (payload: WasabiSendPayload) => {
-
+    setLoading(true);
+    try {
+      const serverResp = await postCallProxy('wasabi_spend', payload);
+      if (!serverResp.ok) {
+        // debugger;
+        let errorString = serverResp.status + ': ' + serverResp.statusText;
+        if (serverResp.body) {
+          const serverError = await serverResp.json();
+          // debugger;
+          errorString = errorString + ': ' + (serverError.message ? serverError.message : JSON.stringify(serverError));
+        }
+        throw new Error(errorString);
+      }
+      const response = await serverResp.json();
+      if (response.result === 'error') {
+        throw new Error(response.message);
+      } else if(response.error !== undefined) {
+        throw new Error(response.error.message);
+      } else {
+        reset();
+        toast({
+          title: 'Transaction accepted',
+          description: response.txid,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        })
+      }
+    } catch (err: unknown) {
+      handleError(err);
+    } finally {
+      setLoading(false);
+    }
   }
 
 
@@ -169,31 +206,19 @@ const WasabiSendForm = () => {
           <FormErrorMessage> Label is required </FormErrorMessage>: null }
         </FormControl>
 
-        <Flex justifyContent='space-between' gap={2}>
-            { /* Min Anon field */ }
-            <FormControl flex={5} width='100%' mb={2} isInvalid={errors.hasOwnProperty('minAnonSet')}>
-                <FormLabel>Min Anon set</FormLabel>
+        { /* Instance field */ }
+        <FormControl isInvalid={errors.hasOwnProperty('instanceId')}>
+          <FormLabel>Instance</FormLabel>
+          <InputGroup flexDirection='column' gap='5px'>
+            <Select {...register('instanceId', {required: true})} placeholder="Select an instance">
+              <option value={0}>Instance 0</option>
+              <option value={1}>Instance 1</option>
+            </Select>
+          </InputGroup>
 
-                <Input type='text' {...register('minAnonSet', { required: true})} />
-
-                {
-                    errors.minAnonSet?.type === 'required'
-                    ? <FormErrorMessage> Min Anon Set is required </FormErrorMessage>
-                    : null
-                }
-            </FormControl>
-
-            { /* Private field */ }
-            <FormControl flex={1} display='flex' justifyContent='end' alignItems='end' mb={2} isInvalid={errors.hasOwnProperty('minAnonSet')}>
-
-                <Flex gap={1}>
-                    {/* <Input type='text' {...register('minAnonSet', { required: true})} /> */}
-                    <Switch  {...register('isPrivate')} />
-                    <FormLabel>Private</FormLabel>
-                </Flex>
-            </FormControl>
-        </Flex>
-
+          { errors.instanceId?.type === 'required' ? 
+          <FormErrorMessage> Instance is required </FormErrorMessage>: null }
+        </FormControl>
 
         <Button type='submit' marginTop={{base: '20px', md: '10px'}} alignSelf={{base: 'center', md: 'end'}} w={{base: '50%', md: '20%'}}> Submit </Button>
 

@@ -159,5 +159,41 @@ export type Wasabi = {
 }
 
 export type WasabiSendPayload = {
-  
+  instanceId: number,
+  private: boolean,
+  amount: number,
+  address: string,
+  label: string,
+  minanonset: number,
 };
+
+export type WasabiGetAddressPayload = {
+  instanceId: number,
+  label: string,
+};
+
+export type WasabiInstanceBalance = {
+  rcvd0conf: number;
+  mixing: number;
+  private: number;
+  total: number;
+};
+
+export type WasabiGetBalancesSuccessResponse = {
+  0: WasabiInstanceBalance,
+  1: WasabiInstanceBalance,
+  "all": WasabiInstanceBalance,
+}
+
+export type WasabiTxn = {
+  datetime: string,
+  height: number,
+  amount: number,
+  label: string[],
+  tx: string,
+  islikelycoinjoin: boolean,
+};
+
+export type WasabiGetTransactionsPayload = {
+  instanceId?: number,
+}

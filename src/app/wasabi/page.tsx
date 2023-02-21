@@ -10,7 +10,7 @@ import {
 import { Widget, WasabiTxnTable } from '@shared/components';
 import WasabiSendForm from '@shared/components/wasabi/WasabiSendForm';
 import WasabiReceive from '@shared/components/wasabi/WasabiReceive';
-import WasabiBalance from '@shared/components/wasabi/WasabiBalance';
+import WasabiBalances from '@shared/components/wasabi/WasabiBalance';
 
 export default function Wasabi() {
 
@@ -20,11 +20,11 @@ export default function Wasabi() {
 
   return (
     <Widget>
-      <Flex justifyContent='space-between' flexDirection={{base: 'column', sm: 'row'}} gap={{base: 10}} >
+      <Flex justifyContent='space-between' flexDirection={{base: 'column', xl: 'row'}} gap={{base: 10}} >
 
-      <WasabiBalance />
+      <WasabiBalances />
 
-        <Flex gap={30}>
+        <Flex gap={30} justifyContent='center'>
           <Button width={{base: '50%', sm: 200}} h={12} onClick={() => setShowSend(!showSend) }> Send </Button>
           <Button width={{base: '50%', sm: 200}} h={12} onClick={() => setShowReceive(!showReceive) }> Receive </Button>
         </Flex>

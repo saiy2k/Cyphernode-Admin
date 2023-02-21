@@ -38,6 +38,11 @@ const urlAndApiId: any = {
 
   ots_stamp: API_ID.THREE,
   ots_info: API_ID.THREE,
+
+  wasabi_getbalances: API_ID.TWO,
+  wasabi_spend: API_ID.TWO,
+  wasabi_getnewaddress: API_ID.TWO,
+  wasabi_gettransactions: API_ID.TWO,
 };
 
 export function generateKey(url: string) {

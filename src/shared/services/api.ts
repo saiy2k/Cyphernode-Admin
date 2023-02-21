@@ -16,6 +16,19 @@ export const getCallA = (urlFragment: string): Promise<any> => {
   });
 }
 
+export const postCallA = (urlFragment: string, payload: any): Promise<any> => {
+
+  const topUrlSegment = urlFragment.split("/")[0];
+
+  return axios.post(urlFragment, payload, {
+    baseURL: baseURL,
+    headers: {
+      Authorization: `Bearer ${generateKey(topUrlSegment)}`,
+    },
+    httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+  });
+}
+
 export const getCallProxy = (urlFragment: string, query: any = {}): Promise<any> => {
   const queryString = new URLSearchParams(query);
 
