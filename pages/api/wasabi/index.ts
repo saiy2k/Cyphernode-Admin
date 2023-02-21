@@ -8,9 +8,11 @@ import { SuccessResponse, ErrorResponse, WasabiTxn, WasabiGetTransactionsPayload
 
 const QSortColumn = ["date", "amount", "txid"] as const;
 const QSortDirection = ["ASC", "DESC"] as const;
+const QType = ['in', 'out'] as const;
 
 type QSortColumnEnum = typeof QSortColumn[number];
 type QSortDirectionEnum = typeof QSortDirection[number];
+type QTypeEnum = typeof QType[number];
 
 export type RequestQuery = {
     instanceId?: number,
@@ -22,6 +24,7 @@ export type RequestQuery = {
     amountMax?: number;
 
     txid?: string;
+    type?: QTypeEnum;
 
     sortColumn?: QSortColumnEnum;
     sortDirection?: QSortDirectionEnum;
@@ -78,6 +81,14 @@ export default async function handler(
         if (query.txid) {
             filteredTxns = filteredTxns.filter(txn => txn.tx.includes(query.txid!));
         }
+
+        if(query.type) {
+            if(query.type === 'in') {
+                filteredTxns = filteredTxns.filter(txn => txn.amount >= 0);
+            } else {
+                filteredTxns = filteredTxns.filter(txn => txn.amount < 0);
+            }
+        }
     
         filteredTxns.sort((a: WasabiTxn, b: WasabiTxn) => {
             if (query.sortColumn === 'amount') {
@@ -131,6 +142,7 @@ export function parseQueryParams(
     if (req.query.end) query.end = req.query.end as string;
 
     if (req.query.txid) query.txid = req.query.txid as string;
+    if (req.query.type) query.type = req.query.type as QTypeEnum;
 
     if (req.query.sortColumn) query.sortColumn = req.query.sortColumn as QSortColumnEnum;
     if (req.query.sortDirection) query.sortDirection = req.query.sortDirection as QSortDirectionEnum;

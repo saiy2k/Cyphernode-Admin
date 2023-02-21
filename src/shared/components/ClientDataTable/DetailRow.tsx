@@ -41,24 +41,27 @@ export type DetailRowData = {
     return (
       <Box mb={2} flex={1}>
         {
-          editMode && !nonEditable
-          ? <DetailRowInput type={type} value={value} onChange={onValueChange} options={options} />
-          : (
-              <Flex justifyContent='center' flexDirection='column' textAlign='start'>
-                <b> {title} </b>
-                <Box
-                  whiteSpace={{base: 'nowrap', md: 'normal'}}
-                  overflow={{base: 'hidden', md: 'unset'}}
-                  maxWidth={{
-                    base: 'calc(100vw - 85px);', // 85px = ((20px [padding] + 20px [padding]) * 2) + 5px [extra space]
-                    md: '500px'
-                  }}
-                  textOverflow='ellipsis' {...textStyles.body}
-                >
-                  {<TextComponent {...textOverflowStyle} />}
-                </Box>
-              </Flex>
-            )
+          (Array.isArray(value) ? value.length > 0: value !== undefined)
+          ?
+            editMode && !nonEditable
+            ? <DetailRowInput type={type} value={value} onChange={onValueChange} options={options} />
+            : (
+                <Flex justifyContent='center' flexDirection='column' textAlign='start'>
+                  <b> {title} </b>
+                  <Box
+                    whiteSpace={{base: 'nowrap', md: 'normal'}}
+                    overflow={{base: 'hidden', md: 'unset'}}
+                    maxWidth={{
+                      base: 'calc(100vw - 85px);', // 85px = ((20px [padding] + 20px [padding]) * 2) + 5px [extra space]
+                      md: '500px'
+                    }}
+                    textOverflow='ellipsis' {...textStyles.body}
+                  >
+                    {<TextComponent {...textOverflowStyle} />}
+                  </Box>
+                </Flex>
+              )
+            : null
         }
       </Box>
     );

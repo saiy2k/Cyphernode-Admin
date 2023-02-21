@@ -167,6 +167,8 @@ export type WasabiSendPayload = {
   minanonset: number,
 };
 
+export type WasabiInstance = ("ALL" | "0" | "1");
+
 export type WasabiGetAddressPayload = {
   instanceId: number,
   label: string,
